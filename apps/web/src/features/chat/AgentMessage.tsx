@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { CopyButton } from '../../components/CopyButton';
-import type { AgentTurn } from './conversation';
+import { plural } from '../../lib/format';
+import { tokensText, type AgentTurn } from './conversation';
 import { flowSections, type Block } from './flowSections';
 import { PlanCard } from './PlanCard';
 import type { PlacedPlan } from './planPlacement';
@@ -12,6 +13,10 @@ import { StatusLine } from './StatusLine';
 import { TextBlock } from './TextBlock';
 import { ThoughtLine } from './ThoughtLine';
 import { ToolSteps } from './ToolStep';
+
+/** Token counts that open the token breakdown: dotted underline, so they read as a link. */
+export const TOKENS_BUTTON =
+  'rounded-sm underline decoration-line-strong decoration-dotted underline-offset-[3px] transition-colors hover:text-accent-2 hover:decoration-current hover:decoration-solid';
 
 /** The reply's answer text (not notes on the way to a tool call, nor errors), as Markdown. */
 function answerText(turn: AgentTurn): string {
@@ -105,22 +110,23 @@ export function AgentMessage({
           {answer && <CopyButton text={answer} label="Copy response" />}
           {turn.meta && (
             <span className={answer ? '' : 'pl-1.5'}>
-              {turn.meta}
+              {turn.usage && onShowUsage ? (
+                <>
+                  {plural(turn.usage.steps, 'step')} ·{' '}
+                  <button
+                    type="button"
+                    onClick={onShowUsage}
+                    title="Token breakdown: each request this reply sent to the model, and its tokens"
+                    className={TOKENS_BUTTON}
+                  >
+                    {tokensText(turn.usage.usage)}
+                  </button>
+                </>
+              ) : (
+                turn.meta
+              )}
               <MessageTime iso={turn.finishedAt} prefix=" · " />
             </span>
-          )}
-          {turn.usage && onShowUsage && (
-            <>
-              <span aria-hidden>·</span>
-              <button
-                type="button"
-                onClick={onShowUsage}
-                title="Each request this reply sent to the model, and its tokens"
-                className="rounded-sm text-ink-3 underline decoration-line-strong underline-offset-2 hover:text-accent-2 hover:decoration-current"
-              >
-                Token breakdown
-              </button>
-            </>
           )}
         </div>
       )}

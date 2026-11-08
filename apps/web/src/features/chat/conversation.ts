@@ -180,16 +180,16 @@ function planGoal(args: string): string {
 
 const isDecided = (state: ApprovalState) => state === 'allowed' || state === 'denied';
 
-/** "2 steps · 4.4K tokens · 3.9K cached": the cached part is input read from the server's cache. */
-function metaText(steps: number, usage: Usage): string {
+/** "4.4K tokens · 3.9K cached": the cached part is input read from the server's cache. */
+export function tokensText(usage: Usage): string {
   const cached = usage.cachedInputTokens ?? 0;
-  return [
-    plural(steps, 'step'),
-    `${compactNumber(usage.inputTokens + usage.outputTokens)} tokens`,
-    cached ? `${compactNumber(cached)} cached` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const total = `${compactNumber(usage.inputTokens + usage.outputTokens)} tokens`;
+  return cached ? `${total} · ${compactNumber(cached)} cached` : total;
+}
+
+/** "2 steps · 4.4K tokens · 3.9K cached" */
+function metaText(steps: number, usage: Usage): string {
+  return `${plural(steps, 'step')} · ${tokensText(usage)}`;
 }
 
 /**
