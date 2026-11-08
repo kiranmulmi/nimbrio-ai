@@ -12,8 +12,11 @@ const OPTIONS: Array<{
   { theme: 'system', label: 'System', icon: MonitorIcon },
 ];
 
-/** One button that cycles the theme: light, dark, then following the system setting. */
-export function ThemeToggle() {
+/**
+ * One button that cycles the theme: light, dark, then following the system setting. `sm` fits
+ * the chat screen's 32px footer.
+ */
+export function ThemeToggle({ size = 'md' }: { size?: 'sm' | 'md' }) {
   const { theme, setTheme } = useTheme();
   const index = Math.max(
     0,
@@ -29,9 +32,11 @@ export function ThemeToggle() {
       onClick={() => setTheme(next.theme)}
       aria-label={`Theme: ${current.label}. Switch to ${next.label.toLowerCase()}`}
       title={`Theme: ${current.label} (click for ${next.label.toLowerCase()})`}
-      className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+      className={`grid shrink-0 place-items-center text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink ${
+        size === 'sm' ? 'h-6 w-6 rounded-md' : 'h-8 w-8 rounded-lg'
+      }`}
     >
-      <current.icon size={16} />
+      <current.icon size={size === 'sm' ? 14 : 16} />
     </button>
   );
 }

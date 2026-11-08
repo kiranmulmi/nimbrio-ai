@@ -33,14 +33,15 @@ export function ConfirmDeleteDialog({
     return () => window.removeEventListener('keydown', handler, true);
   }, [open, busy, onCancel]);
 
-  // Portalled to <body>: a transformed ancestor (the sliding panel) would trap `fixed`.
+  // Portalled to <body>: a transformed ancestor (the sliding panel) would trap `fixed`. Above
+  // popups (z-70) whatever their order in <body>: opened from one, it was hidden behind it.
   return createPortal(
     <div
       role="alertdialog"
       aria-modal="true"
       aria-hidden={!open}
       aria-label={title}
-      className={`fixed inset-0 z-[70] grid place-items-center transition-opacity duration-150 ${
+      className={`fixed inset-0 z-[80] grid place-items-center transition-opacity duration-150 ${
         open ? 'pointer-events-auto opacity-100' : 'pointer-events-none invisible opacity-0'
       }`}
     >

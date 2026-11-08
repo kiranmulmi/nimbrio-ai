@@ -1,12 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import type { ApprovalMode } from '@app/shared';
 import { Badge } from '../../components/Badge';
+import { ThemeToggle } from '../../layout/ThemeToggle';
 import { GearIcon } from '../../lib/icons';
 
 /**
  * The footer's Preferences: opens the app settings (Models, MCP servers, Agent) in a popup.
  * When approvals aren't "ask", a badge beside it says so, since that changes what the agent
- * may do without asking.
+ * may do without asking. The theme switch follows it on wide screens, where the chat screen has
+ * no top bar (below `xl` the top bar has its own).
  */
 export function PreferencesLink({ approval }: { approval: ApprovalMode | null }) {
   const { pathname } = useLocation();
@@ -26,6 +28,9 @@ export function PreferencesLink({ approval }: { approval: ApprovalMode | null })
         <GearIcon size={14} />
         Preferences
       </Link>
+      <span className="hidden xl:contents">
+        <ThemeToggle size="sm" />
+      </span>
     </>
   );
 }

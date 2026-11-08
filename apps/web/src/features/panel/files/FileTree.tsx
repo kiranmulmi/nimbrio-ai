@@ -14,7 +14,7 @@ import {
   TrashIcon,
 } from '../../../lib/icons';
 import { NameInput } from './NameInput';
-import { RowMenu, type RowMenuItem } from './RowMenu';
+import { RowMenu, type RowMenuItem } from '../../../components/RowMenu';
 import { fileTint } from './fileTint';
 
 interface FileNode {

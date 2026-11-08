@@ -1,17 +1,26 @@
-import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { ModelProfile } from '@app/shared';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
+import { ConfirmDeleteDialog } from '../../components/ConfirmDeleteDialog';
 import { PageLoader } from '../../components/PageLoader';
+import { RowMenu } from '../../components/RowMenu';
 import { Spinner } from '../../components/Spinner';
 import { TopbarActions, usePageHeader } from '../../layout/pageHeader';
 import { errorMessage } from '../../lib/api';
-import { PlusIcon, SparkIcon } from '../../lib/icons';
+import {
+  CheckIcon,
+  DotsVerticalIcon,
+  EditIcon,
+  PlusIcon,
+  SparkIcon,
+  TrashIcon,
+} from '../../lib/icons';
 import { fromPath } from '../../lib/routerState';
 import { useToast } from '../../lib/toast';
 import { SettingsTabs } from '../settings/SettingsTabs';
-import { makeDefaultModel } from './api';
+import { deleteModel, makeDefaultModel } from './api';
 import { serverLabel } from './servers';
 import { useModels } from './useModels';
 import { APP_NAME } from '../../lib/brand';
@@ -28,6 +37,9 @@ export function ModelsPage() {
   const toast = useToast();
   const models = useModels();
   const [pendingDefault, setPendingDefault] = useState<string | null>(null);
+  const [menu, setMenu] = useState<{ id: string; anchor: HTMLElement } | null>(null);
+  const [toDelete, setToDelete] = useState<ModelProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const backTo = fromPath(location.state) ?? '/';
 
   usePageHeader({
@@ -51,6 +63,28 @@ export function ModelsPage() {
       setPendingDefault(null);
     }
   };
+
+  const closeMenu = useCallback(() => setMenu(null), []);
+  const cancelDelete = useCallback(() => setToDelete(null), []);
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteModel(toDelete.id);
+      models.reload();
+      toast('Model deleted');
+      setToDelete(null);
+    } catch (cause) {
+      toast(errorMessage(cause, "Couldn't delete the model."), 'error');
+      setToDelete(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const editModel = (model: ModelProfile) =>
+    navigate(`${LIST_PATH}/${model.id}/edit`, { state: { from: LIST_PATH } });
 
   const list = models.data;
 
@@ -90,10 +124,7 @@ export function ModelsPage() {
       ) : (
         <ul className="panel divide-y divide-line-2">
           {list.map((model) => (
-            <li
-              key={model.id}
-              className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 sm:flex-nowrap sm:px-6"
-            >
+            <li key={model.id} className="flex items-center gap-x-4 px-5 py-4 sm:px-6">
               <span
                 className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${
                   model.isDefault ? 'bg-accent-soft text-accent' : 'bg-surface-2 text-ink-3'
@@ -114,30 +145,71 @@ export function ModelsPage() {
                   {model.model} · {serverLabel(model.baseUrl)}
                 </p>
               </div>
-              <div className="ml-auto flex shrink-0 items-center gap-2">
-                {!model.isDefault && (
-                  <Button
-                    size="sm"
-                    variant="plain"
-                    disabled={pendingDefault !== null}
-                    onClick={() => void makeDefault(model)}
-                  >
-                    {pendingDefault === model.id && <Spinner size={11} />}
-                    Make default
-                  </Button>
-                )}
-                <Link
-                  to={`${LIST_PATH}/${model.id}/edit`}
-                  state={{ from: LIST_PATH }}
-                  className="inline-flex h-7 items-center rounded-lg border border-line bg-surface px-2.5 text-[12px] font-medium text-ink transition-colors hover:border-line-strong hover:bg-subtle"
-                >
-                  Edit
-                </Link>
-              </div>
+              {pendingDefault === model.id && <Spinner size={13} label="Making it the default" />}
+              <button
+                type="button"
+                onClick={(event) =>
+                  setMenu(
+                    menu?.id === model.id ? null : { id: model.id, anchor: event.currentTarget },
+                  )
+                }
+                aria-label={`More for ${model.name}`}
+                aria-haspopup="menu"
+                aria-expanded={menu?.id === model.id}
+                title="Edit, make default, delete…"
+                className={`ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg transition-colors hover:bg-subtle hover:text-ink ${
+                  menu?.id === model.id ? 'bg-subtle text-ink' : 'text-ink-3'
+                }`}
+              >
+                <DotsVerticalIcon size={15} />
+              </button>
+              {menu?.id === model.id && (
+                <RowMenu
+                  anchor={menu.anchor}
+                  onClose={closeMenu}
+                  items={[
+                    {
+                      label: 'Edit',
+                      icon: <EditIcon size={13} />,
+                      onSelect: () => editModel(model),
+                    },
+                    ...(model.isDefault || pendingDefault !== null
+                      ? []
+                      : [
+                          {
+                            label: 'Make default',
+                            icon: <CheckIcon size={13} />,
+                            onSelect: () => void makeDefault(model),
+                          },
+                        ]),
+                    {
+                      label: 'Delete',
+                      icon: <TrashIcon size={13} />,
+                      onSelect: () => setToDelete(model),
+                      isDanger: true,
+                    },
+                  ]}
+                />
+              )}
             </li>
           ))}
         </ul>
       )}
+
+      <ConfirmDeleteDialog
+        open={toDelete !== null}
+        title="Delete this model?"
+        message={
+          <>
+            <strong className="text-ink">{toDelete?.name}</strong> and its saved API key are
+            removed. Chats keep their history.
+            {toDelete?.isDefault && ' The oldest remaining model becomes the default.'}
+          </>
+        }
+        busy={isDeleting}
+        onCancel={cancelDelete}
+        onConfirm={() => void confirmDelete()}
+      />
     </div>
   );
 }

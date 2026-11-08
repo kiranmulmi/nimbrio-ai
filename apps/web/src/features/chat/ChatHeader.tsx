@@ -1,6 +1,5 @@
 import { Badge } from '../../components/Badge';
 import { IconButton } from '../../components/IconButton';
-import { ThemeToggle } from '../../layout/ThemeToggle';
 import { ConversationIcon, PanelIcon } from '../../lib/icons';
 
 /**
@@ -53,9 +52,6 @@ export function ChatHeader({
         )}
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        <span className="hidden xl:contents">
-          <ThemeToggle />
-        </span>
         {/* While the panel is open its own header has the button that hides it. */}
         {!isPanelShown && (
           <IconButton

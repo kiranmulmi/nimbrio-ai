@@ -19,7 +19,7 @@ import { createEntry, deleteEntry, fetchFileContent, renameEntry, saveFile } fro
 import { FilePreview } from './FilePreview';
 import { FileSearchResults } from './FileSearchResults';
 import { FileTree } from './FileTree';
-import { RowMenu } from './RowMenu';
+import { RowMenu } from '../../../components/RowMenu';
 import { useFileSearch } from './useFileSearch';
 
 const MODES: { id: FileSearchMode; label: string; hint: string }[] = [
