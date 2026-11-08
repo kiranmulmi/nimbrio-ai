@@ -90,7 +90,7 @@ export function CheckIcon({ size = 13, ...rest }: IconProps) {
   );
 }
 
-/** A milestone flag: a finished plan step (tool calls keep the plain check). */
+/** A milestone flag: the plan tools' calls (a finished plan step uses the check). */
 export function FlagIcon({ size = 13, ...rest }: IconProps) {
   return (
     <svg {...base(size)} strokeWidth={1.8} {...rest}>
@@ -545,6 +545,16 @@ export function SearchIcon({ size = 16, ...rest }: IconProps) {
   );
 }
 
+/** A light bulb: the agent's notes while it works, on the way to a tool call. */
+export function BulbIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M8 1.5a4.5 4.5 0 0 0-2.6 8.2c.4.3.6.7.6 1.2V12h4v-1.1c0-.5.2-.9.6-1.2A4.5 4.5 0 0 0 8 1.5z" />
+      <path d="M6.5 14.5h3" />
+    </svg>
+  );
+}
+
 export function BrainIcon({ size = 16, ...rest }: IconProps) {
   return (
     <svg {...base(size)} {...rest}>
@@ -559,6 +569,53 @@ export function CalculatorIcon({ size = 16, ...rest }: IconProps) {
     <svg {...base(size)} {...rest}>
       <rect x="2.5" y="2.5" width="11" height="11" rx="2" />
       <path d="M5 5.5h2M6 4.5v2M9 5.5h2M5 10.5h2M9 9.5h2M9 11.5h2" />
+    </svg>
+  );
+}
+
+export function GlobeIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M2 8h12M8 2c1.6 1.7 2.4 3.7 2.4 6S9.6 12.3 8 14c-1.6-1.7-2.4-3.7-2.4-6S6.4 3.7 8 2z" />
+    </svg>
+  );
+}
+
+export function ClockIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <circle cx="8" cy="8" r="6" />
+      <path d="M8 4.75V8l2.25 1.5" />
+    </svg>
+  );
+}
+
+export function ImageIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <rect x="2" y="2.5" width="12" height="11" rx="1.75" />
+      <circle cx="5.75" cy="6.25" r="1.1" />
+      <path d="m2.5 12 3.5-3.5 2.5 2.5 2-2 3 3" />
+    </svg>
+  );
+}
+
+/** An arrow out of a box: something moved or renamed. */
+export function MoveIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M7 2.5H4A1.5 1.5 0 0 0 2.5 4v8A1.5 1.5 0 0 0 4 13.5h8a1.5 1.5 0 0 0 1.5-1.5V9" />
+      <path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5" />
+    </svg>
+  );
+}
+
+/** A wrench: a tool call with no icon of its own. */
+export function WrenchIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M10.2 2.2a3.5 3.5 0 0 0-4 4.6L2.3 10.7a1.4 1.4 0 0 0 2 2l3.9-3.9a3.5 3.5 0 0 0 4.6-4l-2 2-1.8-.3-.3-1.8 2-2z" />
     </svg>
   );
 }

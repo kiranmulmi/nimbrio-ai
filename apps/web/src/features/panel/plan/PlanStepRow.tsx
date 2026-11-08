@@ -1,6 +1,6 @@
 import type { Ref } from 'react';
 import type { PlanStep, StepStatus } from '@app/shared';
-import { CrossIcon, DashIcon, FlagIcon } from '../../../lib/icons';
+import { CheckIcon, CrossIcon, DashIcon } from '../../../lib/icons';
 import { ActivityLine } from './ActivityLine';
 import { STATUS_LABEL } from './planState';
 
@@ -21,7 +21,7 @@ const NOTE: Record<StepStatus, string> = {
 };
 
 export function Marker({ status, number }: { status: StepStatus; number: number }) {
-  if (status === 'done') return <FlagIcon size={11} />;
+  if (status === 'done') return <CheckIcon size={11} />;
   if (status === 'failed') return <CrossIcon size={11} />;
   if (status === 'skipped') return <DashIcon size={11} />;
   if (status === 'in_progress') {

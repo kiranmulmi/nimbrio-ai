@@ -70,7 +70,20 @@ export type StepMarkItem = {
   number: number;
 };
 
-export type FlowItem = TextItem | NoteItem | ToolItem | ApprovalItem | PlanMarkItem | StepMarkItem;
+/**
+ * The planning step at the start of a run, where the agent decided whether to plan:
+ * "Thought for 12s" once it decided. `durationMs` is null while it's still thinking.
+ */
+export type ThoughtItem = {
+  kind: 'thought';
+  key: string;
+  /** when planning started (ms), to time it live; null for a saved chat */
+  startedAt: number | null;
+  durationMs: number | null;
+};
+
+export type FlowItem =
+  TextItem | NoteItem | ToolItem | ApprovalItem | PlanMarkItem | StepMarkItem | ThoughtItem;
 
 export type UserTurn = {
   role: 'user';
@@ -302,6 +315,56 @@ class Draft {
     this.ensureAgent().flow.push({ kind: 'note', key: this.key('n'), text, tone });
   }
 
+  /** The planning step began: timed live until its decision (`finishThought`). */
+  startThought(at: number): void {
+    this.closeSegment();
+    this.ensureAgent().flow.push({
+      kind: 'thought',
+      key: this.key('h'),
+      startedAt: at,
+      durationMs: null,
+    });
+  }
+
+  /** The planning step decided: how long it thought. */
+  finishThought(at: number): void {
+    const flow = this.agent?.flow;
+    if (!flow) return;
+    for (let index = flow.length - 1; index >= 0; index -= 1) {
+      const item = flow[index];
+      if (item?.kind !== 'thought') continue;
+      if (item.durationMs === null && item.startedAt !== null) {
+        flow[index] = { ...item, durationMs: Math.max(0, at - item.startedAt) };
+      }
+      return;
+    }
+  }
+
+  /**
+   * A saved run's planning step, from its planner call's duration: at the start of the run's
+   * first agent turn (the one after the message that started it, not after a steer).
+   */
+  addSavedThought(durationMs: number): void {
+    let index = this.turns.length - 1;
+    while (index >= 0) {
+      const turn = this.turns[index];
+      if (turn?.role === 'user' && !turn.isSteer) break;
+      index -= 1;
+    }
+    index += 1;
+    const turn = this.turns[index];
+    if (turn?.role !== 'agent') return;
+    const thought: ThoughtItem = {
+      kind: 'thought',
+      key: this.key('h'),
+      startedAt: null,
+      durationMs,
+    };
+    const updated: AgentTurn = { ...turn, flow: [thought, ...turn.flow] };
+    this.turns[index] = updated;
+    if (turn === this.agent) this.agent = updated;
+  }
+
   addTool(callId: string | null, name: string, args: string, state: ToolState, result: string) {
     if (PLAN_TOOL_NAMES.has(name)) {
       if (name === 'create_plan') {
@@ -516,6 +579,8 @@ function fromHistory(detail: ChatDetail): ConversationState {
           calls: item.calls,
         };
         turn.finishedAt = item.finishedAt;
+        const planner = item.calls.find((call) => call.kind === 'planner');
+        if (planner) draft.addSavedThought(planner.durationMs);
         draft.endTurn();
         break;
       }
@@ -535,10 +600,12 @@ function applyEvent(state: ConversationState, event: RunEvent, at: number): Conv
 
   switch (event.type) {
     case 'planning':
+      draft.startThought(at);
       draft.setStatus('Planning…');
       plan = withPhase(plan, 'planning', at);
       break;
     case 'route':
+      draft.finishThought(at);
       if (event.mode === 'plan') {
         // Only why it planned: the plan card under it already shows the steps.
         if (event.reason) draft.addNote(event.reason);

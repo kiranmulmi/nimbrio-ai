@@ -10,6 +10,7 @@ import { FlowNote } from './FlowNote';
 import { MessageTime } from './MessageTime';
 import { StatusLine } from './StatusLine';
 import { TextBlock } from './TextBlock';
+import { ThoughtLine } from './ThoughtLine';
 import { ToolSteps } from './ToolStep';
 
 /** The reply's answer text (not notes on the way to a tool call, nor errors), as Markdown. */
@@ -71,6 +72,8 @@ export function AgentMessage({
       }
       case 'note':
         return <FlowNote key={block.key} item={block} />;
+      case 'thought':
+        return <ThoughtLine key={block.key} item={block} />;
       case 'approval':
         return <ApprovalCard key={block.key} item={block} onDecide={onDecide} />;
     }

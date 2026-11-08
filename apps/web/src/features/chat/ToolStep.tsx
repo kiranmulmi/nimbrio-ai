@@ -4,29 +4,32 @@ import { CodeHighlight } from '../../components/CodeHighlight';
 import { CodeText } from '../../components/CodeText';
 import { Spinner } from '../../components/Spinner';
 import { inlineArgs, prettyJson } from '../../lib/format';
-import { CheckIcon, ChevronRightIcon, CrossIcon } from '../../lib/icons';
+import { ChevronRightIcon, CrossIcon } from '../../lib/icons';
 import { languageForPath } from '../../lib/languages';
 import type { ToolItem } from './conversation';
+import { toolIcon } from './toolIcon';
 import { ToolInput } from './ToolInput';
 
-function StepIcon({ state }: { state: ToolItem['state'] }) {
+/** A call's status: a spinner while it runs, a cross if it failed, else the tool's own icon. */
+function StepIcon({ name, state }: { name: string; state: ToolItem['state'] }) {
   if (state === 'running') {
     return (
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-accent-soft">
+      <span className="grid h-5 w-5 place-items-center">
         <Spinner size={10} label="Running" />
       </span>
     );
   }
   if (state === 'error') {
     return (
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-danger-bg text-danger">
-        <CrossIcon size={10} />
+      <span className="grid h-5 w-5 place-items-center text-danger">
+        <CrossIcon size={12} />
       </span>
     );
   }
+  const Icon = toolIcon(name);
   return (
-    <span className="grid h-5 w-5 place-items-center rounded-full bg-success-bg text-success">
-      <CheckIcon size={10} />
+    <span className="grid h-5 w-5 place-items-center text-ink-3">
+      <Icon size={13} />
     </span>
   );
 }
@@ -111,7 +114,7 @@ export function ToolStep({ item }: { item: ToolItem }) {
   return (
     <details className="group text-[12.5px]">
       <summary className="flex h-8 cursor-pointer list-none items-center gap-2.5 rounded-lg px-2.5 text-[11px] transition-colors hover:bg-surface group-open:bg-surface [&::-webkit-details-marker]:hidden">
-        <StepIcon state={item.state} />
+        <StepIcon name={item.name} state={item.state} />
         <span className="shrink-0 font-mono font-semibold text-ink-3">{item.name}</span>
         <span className="min-w-0 flex-1 truncate font-mono text-ink-3 opacity-75">{summary}</span>
         {item.state === 'error' && <Badge tone="red">failed</Badge>}

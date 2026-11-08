@@ -1,6 +1,6 @@
 import type { PlanStep } from '@app/shared';
 import { plural } from '../../../lib/format';
-import { FlagIcon } from '../../../lib/icons';
+import { CheckIcon } from '../../../lib/icons';
 
 /** One row standing in for the finished steps at the top of the plan. */
 export function PlanFoldRow({
@@ -23,7 +23,7 @@ export function PlanFoldRow({
         }`}
       />
       <span className="grid h-5 w-5 place-items-center rounded-full bg-success-bg text-success">
-        <FlagIcon size={11} />
+        <CheckIcon size={11} />
       </span>
       <span className="flex min-h-5 items-center justify-between gap-2 text-[13px] text-ink-3">
         <span>
