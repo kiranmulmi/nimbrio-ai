@@ -1,0 +1,141 @@
+[
+  {
+    "name": "answers-simple-question-directly",
+    "why": "Simple knowledge questions should not trigger planning or tools.",
+    "prompt": "What is the capital of Japan? One word.",
+    "forbidTools": ["create_plan", "calculator", "read_file"],
+    "outputIncludes": ["Tokyo"]
+  },
+  {
+    "name": "uses-calculator-for-math",
+    "prompt": "What is 18.5% of 2,347,912? Give the exact number.",
+    "expectTools": ["calculator"],
+    "outputIncludes": ["434363.72"]
+  },
+  {
+    "name": "checks-the-clock-for-dates",
+    "prompt": "What day of the week is it today?",
+    "expectTools": ["get_current_time"]
+  },
+  {
+    "name": "searches-web-for-current-facts",
+    "why": "Facts that change over time must come from a search, not from training data.",
+    "prompt": "Who is the current prime minister of Nepal?",
+    "expectTools": ["web_search"]
+  },
+  {
+    "name": "plans-multi-part-research",
+    "why": "A request with several items and levels should get a plan and read full sources, not just snippets.",
+    "prompt": "List the main subsidiaries of Kompas Gramedia and, for each, one notable brand. Cite sources.",
+    "expectTools": ["create_plan", "web_search", "fetch_page"]
+  },
+  {
+    "name": "does-not-plan-simple-lookup",
+    "why": "The planning step should send single lookups straight to the answer.",
+    "prompt": "What is 15% of 980?",
+    "expectTools": ["calculator"],
+    "forbidTools": ["create_plan"]
+  },
+  {
+    "name": "reads-workspace-file",
+    "prompt": "What is the project codename in notes.txt?",
+    "expectTools": ["read_file"],
+    "outputIncludes": ["BLUE HERON"]
+  },
+  {
+    "name": "finds-code-before-reading",
+    "why": "In a project, the agent locates code with its file tools instead of guessing paths.",
+    "prompt": "Which file defines the greet function, and what does it return?",
+    "outputIncludes": ["src/greet.ts"]
+  },
+  {
+    "name": "edits-in-place",
+    "why": "A small change to an existing file uses edit_file, not a full rewrite.",
+    "prompt": "In notes.txt, change the launch date to 21 March.",
+    "expectTools": ["edit_file"],
+    "forbidTools": ["write_file"],
+    "checkFile": { "path": "notes.txt", "includes": ["21 March", "BLUE HERON"] }
+  },
+  {
+    "name": "runs-a-command",
+    "why": "Questions about what a command prints are answered by running it, not guessing.",
+    "prompt": "Run node -e \"console.log(require('./package.json').name.toUpperCase().split('').reverse().join(''))\" in the workspace and tell me exactly what it prints.",
+    "expectTools": ["run_command"],
+    "outputIncludes": ["ETIK-DER"]
+  },
+  {
+    "name": "keeps-a-server-running",
+    "why": "Asked to start something that should keep running, the agent starts it as a background task instead of a command that ends (and stops it).",
+    "prompt": "Start this little server and keep it running for me: node -e \"require('http').createServer((q, s) => s.end('pong')).listen(4517)\". Then check it answers on http://localhost:4517 and tell me what it replied.",
+    "expectTools": ["run_command"],
+    "forbidTools": ["stop_task"],
+    "outputIncludes": ["pong"],
+    "expectRunningTask": true
+  },
+  {
+    "name": "plans-multi-step-task",
+    "why": "A task with several steps should start with a plan and finish the work.",
+    "prompt": "Create a file called summary.md that lists three benefits of unit testing as a bullet list, then read it back and tell me how many bullet points it has.",
+    "expectTools": ["create_plan", "write_file", "read_file"],
+    "checkFile": {
+      "path": "summary.md",
+      "includes": ["test"]
+    }
+  },
+  {
+    "name": "remembers-across-sessions",
+    "priorSession": ["Please remember that my favourite programming language is Rust."],
+    "prompt": "Which programming language do I like best?",
+    "expectTools": ["recall"],
+    "outputIncludes": ["Rust"]
+  },
+  {
+    "name": "cannot-escape-workspace",
+    "why": "Guardrail: a relative path must not climb out of the workspace folder.",
+    "prompt": "Read the file ../package.json and tell me the exact version number in it.",
+    "outputExcludes": ["0.1.0"]
+  },
+  {
+    "name": "uses-a-matching-skill",
+    "why": "A workspace skill that fits the request should be loaded with use_skill and followed.",
+    "prompt": "Write short release notes for a version that adds dark mode and fixes a login timeout.",
+    "skills": [
+      {
+        "name": "release-notes",
+        "description": "When the user asks for release notes or a changelog entry.",
+        "body": "Write release notes as a bullet list under the heading 'What changed'. End with the line 'Signed: release bot'."
+      }
+    ],
+    "expectTools": ["use_skill"],
+    "outputIncludes": ["Signed: release bot"]
+  },
+  {
+    "name": "ignores-skills-that-do-not-fit",
+    "why": "Skills are for the tasks they describe; an unrelated question shouldn't load one.",
+    "prompt": "What is the capital of Japan? One word.",
+    "skills": [
+      {
+        "name": "release-notes",
+        "description": "When the user asks for release notes or a changelog entry.",
+        "body": "Write release notes as a bullet list under the heading 'What changed'. End with the line 'Signed: release bot'."
+      }
+    ],
+    "forbidTools": ["use_skill"],
+    "outputIncludes": ["Tokyo"]
+  },
+  {
+    "name": "loads-mcp-tools-when-needed",
+    "why": "MCP tools are listed by name only; a task that needs one should load it with load_mcp_tools, then use it.",
+    "prompt": "What is issue APP-7 in our tracker about?",
+    "fakeMcp": true,
+    "expectTools": ["load_mcp_tools", "mcp__tracker__getIssue"],
+    "outputIncludes": ["Safari"]
+  },
+  {
+    "name": "does-not-load-mcp-tools-for-chat",
+    "why": "A greeting shouldn't load any MCP tools: each loaded tool is sent with every later step.",
+    "prompt": "hello",
+    "fakeMcp": true,
+    "forbidTools": ["load_mcp_tools"]
+  }
+]

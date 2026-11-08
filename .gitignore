@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+.vite/
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test & coverage
+coverage/
+
+# Editor / IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Agent local state (shared rules and skills in .claude/ are committed)
+.claude/settings.local.json
+.claude/local/
+
+.nimbrio-ai

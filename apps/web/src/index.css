@@ -1,0 +1,645 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /*
+   * Teal and navy on a soft mint white: navy ink for headings and text, one teal accent for
+   * actions and highlights, a coral for the odd warm highlight, and rounded white cards
+   * that float on a softly glowing background.
+   */
+  :root {
+    color-scheme: light;
+
+    /* Corner radius, one scale for the whole app (Tailwind's rounded-md…2xl read these). */
+    --radius-card: 8px; /* rounded-2xl: cards, panels, dialogs, the chat's answers */
+    --radius-control: 5px; /* rounded-xl: inputs, buttons, menus, chips */
+    --radius-small: 7px; /* rounded-lg: tiles, small buttons, list rows */
+    --radius-tiny: 5px; /* rounded-md: inline code, tiny badges */
+
+    /* Inter (bundled: @fontsource-variable/inter in main.tsx), then system fonts. */
+    --font-sans:
+      'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+      'Helvetica Neue', Arial, sans-serif;
+
+    --bg: #f2f7f6;
+    --surface: #ffffff;
+    --subtle: #f5faf9;
+    /* Behind the conversation: a very light neutral grey, so the white cards stand out. */
+    --chat-bg: #fafbfc;
+    /* Search in the file preview: matches, the current one, and its line. */
+    --search-match: #fff1b8;
+    --search-current: #ffc94d;
+    --search-line: #fff9e3;
+    /* Answers' code chips, code blocks and tables: neutral greys, no mint. */
+    --md-fill: #f2f4f6;
+    --md-fill-soft: #f8f9fa;
+    --md-line: #e2e5e9;
+    --md-line-soft: #edf0f2;
+    --surface-2: #e8f2f0;
+    --ink: #10263f;
+    --ink-2: #3d5169;
+    --ink-3: #66788c;
+    --ink-4: #b5c4cc;
+    --line: #d9e6e4;
+    --line-2: #e7f0ee;
+    --line-strong: #b7cdc9;
+
+    --accent: #0c9a8b;
+    --accent-hover: #098577;
+    --accent-2: #087266;
+    --accent-bg: #cfeee8;
+    --accent-soft: #e6f6f3;
+    --on-accent: #ffffff;
+    --focus: #0a6b61;
+    --overlay: rgb(16 38 63 / 0.42);
+    --selection: #bfe8e1;
+    --coral: #e2674d;
+    --coral-bg: #fbe7e1;
+    /* token usage bars; checked for colour-blind separation and contrast on --surface */
+    --usage-cached: #3b6fd4;
+    --usage-input: #0c9a8b;
+    --usage-output: #e2674d;
+
+    --success: #138a5b;
+    --success-bg: #ddf2e8;
+    --success-line: #1fa86f;
+    --warn: #8f6400;
+    --warn-bg: #fff0c7;
+    --warn-line: #f0b000;
+    --danger: #c42a2a;
+    --danger-bg: #fbe4e1;
+    --danger-line: #e0463a;
+
+    --brand-from: #3fd2c2;
+    --brand-mid: #0c9a8b;
+    --brand-to: #10263f;
+
+    /* The page's soft glows (body background). */
+    --glow-1: rgb(63 210 194 / 0.16);
+    --glow-2: rgb(16 38 63 / 0.06);
+
+    /* File tree: one tint per kind of file, chosen to read on white. */
+    --ft-folder: #d48806;
+    --ft-ts: #2f74c0;
+    --ft-js: #b58a00;
+    --ft-json: #c86a00;
+    --ft-npm: #c3362b;
+    --ft-style: #9b4dca;
+    --ft-markup: #d2502a;
+    --ft-doc: #0b84b8;
+    --ft-python: #2b7a9e;
+    --ft-shell: #2e8b47;
+    --ft-config: #6461c9;
+    --ft-image: #c2367a;
+    --ft-data: #0f8f84;
+    --ft-code: #3b6fd9;
+
+    /* Code (lib/highlight.ts): keywords, strings, numbers, comments, names, types */
+    --code-keyword: #8a3fd1;
+    --code-string: #18794e;
+    --code-number: #b4530a;
+    --code-comment: #7a8a9c;
+    --code-function: #0b5cad;
+    --code-type: #0a7d71;
+    --code-attr: #9a5b00;
+    --code-tag: #c0336f;
+
+    /* JSON: keys, strings, numbers, true/false, null */
+    --json-key: #0b5cad;
+    --json-string: #18794e;
+    --json-number: #b4530a;
+    --json-boolean: #7c4dce;
+    --json-null: #c0336f;
+
+    --shadow-card: 0 1px 2px rgb(16 38 63 / 0.04), 0 10px 28px -14px rgb(16 38 63 / 0.16);
+    --shadow-float: 0 16px 32px -10px rgb(16 38 63 / 0.18), 0 4px 10px -4px rgb(16 38 63 / 0.08);
+    --shadow-dialog: 0 28px 60px -16px rgb(16 38 63 / 0.3), 0 6px 14px -6px rgb(16 38 63 / 0.1);
+    --shadow-accent: 0 6px 16px -6px rgb(12 154 139 / 0.55);
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --bg: #08131f;
+    --surface: #0e1d2e;
+    --subtle: #0c1928;
+    --chat-bg: #0a1625;
+    --search-match: #5a4a14;
+    --search-current: #a87f12;
+    --search-line: #2a2514;
+    --md-fill: #1b2532;
+    --md-fill-soft: #141d28;
+    --md-line: #2a3646;
+    --md-line-soft: #222d3b;
+    --surface-2: #16293d;
+    --ink: #eef6f7;
+    --ink-2: #b6c6d2;
+    --ink-3: #8597a9;
+    --ink-4: #415568;
+    --line: #1f354b;
+    --line-2: #172b3f;
+    --line-strong: #34506b;
+
+    --accent: #2fc6b6;
+    --accent-hover: #4fd5c6;
+    --accent-2: #86e3d8;
+    --accent-bg: #123f43;
+    --accent-soft: #0f2f37;
+    --on-accent: #032421;
+    --focus: #86e3d8;
+    --overlay: rgb(2 8 15 / 0.65);
+    --selection: #1b4c52;
+    --coral: #f08a72;
+    --coral-bg: #3d2320;
+    --usage-cached: #5585e6;
+    --usage-input: #139f92;
+    --usage-output: #de6a50;
+
+    --success: #5fd3a0;
+    --success-bg: #123a2e;
+    --success-line: #26b37a;
+    --warn: #f6cd52;
+    --warn-bg: #45391a;
+    --warn-line: #e5a900;
+    --danger: #f08a8a;
+    --danger-bg: #44191d;
+    --danger-line: #e24a4a;
+
+    --brand-from: #4fd5c6;
+    --brand-mid: #1aa596;
+    --brand-to: #0b3a4a;
+
+    --glow-1: rgb(47 198 182 / 0.12);
+    --glow-2: rgb(80 140 220 / 0.07);
+
+    --ft-folder: #f0b43c;
+    --ft-ts: #5a9ee8;
+    --ft-js: #e8c94a;
+    --ft-json: #f0a050;
+    --ft-npm: #ef6b5f;
+    --ft-style: #c58ff0;
+    --ft-markup: #f2875f;
+    --ft-doc: #4cb8e6;
+    --ft-python: #5fb0d4;
+    --ft-shell: #6cc788;
+    --ft-config: #9e9cf0;
+    --ft-image: #ef7fb3;
+    --ft-data: #4fc7bb;
+    --ft-code: #7ea4f2;
+
+    --code-keyword: #c3a6f7;
+    --code-string: #7fd6a4;
+    --code-number: #f3a96a;
+    --code-comment: #7d8ea0;
+    --code-function: #7cb7f5;
+    --code-type: #5fd3c4;
+    --code-attr: #f0c06a;
+    --code-tag: #f28cb8;
+
+    --json-key: #7cb7f5;
+    --json-string: #7fd6a4;
+    --json-number: #f3a96a;
+    --json-boolean: #c3a6f7;
+    --json-null: #f28cb8;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 30px -16px rgb(0 0 0 / 0.6);
+    --shadow-float: 0 16px 36px -10px rgb(0 0 0 / 0.6);
+    --shadow-dialog: 0 28px 60px -16px rgb(0 0 0 / 0.7);
+    --shadow-accent: 0 6px 18px -6px rgb(47 198 182 / 0.45);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+    font-size: 14px;
+    line-height: 1.55;
+    /* Soft glows in two corners, like light on a poster; fixed so they don't scroll. */
+    background-image:
+      radial-gradient(60rem 40rem at 105% -10%, var(--glow-1), transparent 60%),
+      radial-gradient(50rem 36rem at -10% 110%, var(--glow-2), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: var(--selection);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--line-strong);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* While the side panel is dragged: no text selection, and the frames under the pointer stay inert. */
+  body.is-resizing {
+    cursor: col-resize;
+    user-select: none;
+  }
+  body.is-resizing main,
+  body.is-resizing [data-panel-body] {
+    pointer-events: none;
+  }
+  /* While the panel's lower section (Memory, MCP) is dragged taller or shorter. */
+  body.is-resizing-rows {
+    cursor: row-resize;
+    user-select: none;
+  }
+  body.is-resizing-rows main,
+  body.is-resizing-rows [data-panel-body] {
+    pointer-events: none;
+  }
+  /* Dragging the panel edge follows the pointer: no animation. */
+  body.is-resizing .panel-grid {
+    transition: none;
+  }
+}
+
+@layer components {
+  /* The chat's answers (and an opened tool call): white cards with a light border and a soft
+     shadow. */
+  .chat-card {
+    @apply rounded-2xl border border-line-2 bg-surface;
+    box-shadow:
+      0 1px 2px rgb(16 38 63 / 0.04),
+      0 4px 16px -8px rgb(16 38 63 / 0.12);
+  }
+  :root[data-theme='dark'] .chat-card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.3),
+      0 4px 16px -8px rgb(0 0 0 / 0.5);
+  }
+
+  /* Card surface: a rounded white card with a soft shadow, floating on the page. */
+  .panel {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
+  /* A tinted header or footer band follows the card's rounded corners (without clipping
+     menus that open out of the card, as overflow: hidden would). */
+  .panel > :first-child {
+    border-top-left-radius: calc(var(--radius-card) - 1px);
+    border-top-right-radius: calc(var(--radius-card) - 1px);
+  }
+  .panel > :last-child {
+    border-bottom-left-radius: calc(var(--radius-card) - 1px);
+    border-bottom-right-radius: calc(var(--radius-card) - 1px);
+  }
+
+  /* Small uppercase label above a group, e.g. "CHATS". */
+  .eyebrow {
+    @apply text-[10.5px] font-bold uppercase tracking-[0.14em] text-ink-3;
+  }
+
+  /* A teal pill label, e.g. "NEW CHAT" above a headline. */
+  .tag {
+    @apply inline-flex h-6 items-center gap-1.5 rounded-full bg-accent px-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-on-accent shadow-accent;
+  }
+
+  /* A word in a headline picked out in the accent colour. */
+  .highlight {
+    @apply text-accent;
+  }
+
+  /* "01", "02": the numbered tile in front of a step. */
+  .step-number {
+    @apply grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-accent-soft text-[13px] font-extrabold tabular-nums text-accent-2;
+  }
+
+  /* The brand tile: teal into navy with a soft bevel. */
+  .brand-mark {
+    @apply inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white;
+    background: linear-gradient(
+      145deg,
+      var(--brand-from) -20%,
+      var(--brand-mid) 45%,
+      var(--brand-to) 120%
+    );
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      inset 0 -1px 0 rgb(0 0 0 / 0.18),
+      0 1px 2px rgb(11 51 103 / 0.25);
+  }
+
+  /* "Working" indicator: a dot with a ring that ripples outward, so the dot never changes size. */
+  .live-dot {
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+  .live-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: live-ripple 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Behind the empty chat: a soft teal glow and a faint dot grid that fades out. */
+  .dot-grid {
+    background-image:
+      radial-gradient(42rem 26rem at 50% 0%, var(--glow-1), transparent 70%),
+      radial-gradient(color-mix(in srgb, var(--accent) 22%, transparent) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      22px 22px;
+    -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent);
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  }
+
+  /* Answers rendered by components/Markdown.tsx. */
+  .markdown p,
+  .markdown ul,
+  .markdown ol,
+  .markdown pre {
+    @apply mb-2.5;
+  }
+  .markdown > :last-child {
+    @apply mb-0;
+  }
+  .markdown h1,
+  .markdown h2,
+  .markdown h3 {
+    @apply mb-1.5 mt-4 font-bold text-ink first:mt-0;
+  }
+  .markdown h1 {
+    @apply text-[17px];
+  }
+  .markdown h2 {
+    @apply text-[15px];
+  }
+  .markdown h3 {
+    @apply text-[14px];
+  }
+  .markdown strong {
+    @apply font-bold text-ink;
+  }
+  .markdown h1,
+  .markdown h2 {
+    @apply font-extrabold;
+  }
+  .markdown ul {
+    @apply list-disc pl-[22px];
+  }
+  .markdown ol {
+    @apply list-decimal pl-[22px];
+  }
+  .markdown li {
+    @apply mb-0.5;
+  }
+  .markdown li::marker {
+    color: var(--ink-3);
+  }
+  /* Inline code: dark text on a neutral chip, so it reads as easily as the prose around it. */
+  .markdown code {
+    @apply rounded-md border border-[var(--md-line)] bg-[var(--md-fill)] px-[5px] py-px font-mono text-[12.5px] text-ink;
+  }
+  .markdown pre {
+    @apply overflow-x-auto rounded-xl border border-[var(--md-line)] bg-[var(--md-fill-soft)] px-4 py-3;
+  }
+  .markdown pre code {
+    @apply border-0 bg-transparent p-0 text-ink;
+  }
+  .markdown a {
+    @apply text-accent underline-offset-2 hover:underline;
+  }
+
+  /* The rest of CommonMark and GitHub Markdown (components/Markdown.tsx). */
+  .markdown h4,
+  .markdown h5,
+  .markdown h6 {
+    @apply mb-1 mt-3 text-[13.5px] font-bold text-ink first:mt-0;
+  }
+  .markdown h5,
+  .markdown h6 {
+    @apply text-ink-2;
+  }
+  .markdown blockquote {
+    @apply mb-2.5 rounded-r-xl border-l-4 border-accent-bg bg-subtle px-4 py-2 text-ink-2;
+  }
+  .markdown blockquote > :last-child {
+    @apply mb-0;
+  }
+  .markdown hr {
+    @apply my-4 border-0 border-t border-line;
+  }
+  .markdown del {
+    @apply text-ink-3;
+  }
+  .markdown img,
+  .markdown .image-link {
+    @apply inline-flex items-center gap-1;
+  }
+  /* Lists inside lists, and the paragraphs a loose list wraps its items in. */
+  .markdown li > ul,
+  .markdown li > ol {
+    @apply mb-0 mt-1;
+  }
+  .markdown li > p {
+    @apply mb-1;
+  }
+  /* Task lists: - [x] done, - [ ] to do */
+  .markdown li.task-list-item {
+    @apply list-none;
+  }
+  .markdown ul.contains-task-list {
+    @apply pl-1;
+  }
+  .markdown li.task-list-item input[type='checkbox'] {
+    @apply mr-2 h-3.5 w-3.5 translate-y-[2px] accent-[var(--accent)];
+  }
+
+  /* The panel's tabs drop their icons when the panel is too narrow for icon and name. */
+  .panel-tabs {
+    container-type: inline-size;
+  }
+  /* Four tabs: their icons go first when the panel is narrow. */
+  @container (max-width: 400px) {
+    .panel-tabs [role='tab'] > svg {
+      display: none;
+    }
+  }
+
+  /* Tables: a rounded card with a tinted header row and soft row lines. */
+  .markdown .table-wrap {
+    @apply mb-2.5 overflow-x-auto rounded-xl border border-[var(--md-line)];
+  }
+  .markdown table {
+    @apply w-full border-collapse text-[13.5px] leading-snug;
+  }
+  .markdown th {
+    @apply whitespace-nowrap border-b border-[var(--md-line)] bg-[var(--md-fill)] px-3.5 py-2.5 text-left text-[12px] font-bold uppercase tracking-[0.04em] text-ink-2;
+  }
+  .markdown td {
+    @apply border-b border-[var(--md-line-soft)] px-3.5 py-2.5 align-top text-ink;
+  }
+  .markdown tbody tr:last-child td {
+    @apply border-b-0;
+  }
+  .markdown tbody tr:nth-child(even) td {
+    background: var(--md-fill-soft);
+  }
+  .markdown tbody tr:hover td {
+    background: var(--md-fill);
+  }
+  /* A first column of labels (an empty top-left cell, as in a comparison) reads as headings. */
+  .markdown td:first-child {
+    @apply min-w-[7rem] font-semibold text-ink;
+  }
+
+  /* A blinking cursor after the last block while text is still arriving. */
+  .markdown.is-streaming > :last-child::after {
+    content: '▍';
+    margin-left: 1px;
+    color: var(--accent);
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .markdown.is-streaming > :last-child::after,
+    .live-dot::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes live-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  75%,
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* JSON colouring (components/CodeText). Outside @layer: the class names are built at runtime, so
+   Tailwind would not see them and drop them. */
+.json-key {
+  color: var(--json-key);
+}
+.json-string {
+  color: var(--json-string);
+}
+.json-number {
+  color: var(--json-number);
+}
+.json-boolean {
+  color: var(--json-boolean);
+}
+.json-null {
+  color: var(--json-null);
+}
+.json-punct {
+  color: var(--ink-3);
+}
+
+/* Code colouring (lib/highlight.ts emits highlight.js's class names). Outside @layer for the
+   same reason as the JSON colours: the classes only exist at runtime. */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-doctag,
+.hljs-meta .hljs-keyword {
+  color: var(--code-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-template-tag,
+.hljs-selector-attr {
+  color: var(--code-string);
+}
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--code-number);
+}
+.hljs-comment,
+.hljs-quote {
+  color: var(--code-comment);
+  font-style: italic;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: var(--code-function);
+}
+.hljs-type,
+.hljs-built_in,
+.hljs-title.class_,
+.hljs-class .hljs-title {
+  color: var(--code-type);
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-property,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: var(--code-attr);
+}
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: var(--code-tag);
+}
+.hljs-meta {
+  color: var(--code-comment);
+}
+.hljs-addition {
+  color: var(--success);
+  background: var(--success-bg);
+}
+.hljs-deletion {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+
+/* File preview search (FilePreview, CSS Custom Highlight API). */
+::highlight(preview-match) {
+  background-color: var(--search-match);
+}
+::highlight(preview-current) {
+  background-color: var(--search-current);
+  color: var(--ink);
+}

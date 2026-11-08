@@ -1,0 +1,38 @@
+{
+  "name": "nimbrio-ai",
+  "version": "0.2.0",
+  "private": true,
+  "description": "A prompt-driven agent built from scratch on any OpenAI-compatible API",
+  "type": "module",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w @app/shared && npm run build -w @app/agent && npm run build -w @app/db",
+    "build": "npm run build:packages && npm run build -w @app/api && npm run build -w @app/cli && npm run build -w @app/web",
+    "start": "npm run build && npm run start -w @app/api",
+    "dev": "npm run build:packages && concurrently --names api,web --prefix-colors cyan,magenta --kill-others-on-fail \"npm run dev -w @app/api\" \"npm run dev -w @app/web\"",
+    "dev:api": "npm run build:packages && npm run dev -w @app/api",
+    "dev:web": "npm run build -w @app/shared && npm run dev -w @app/web",
+    "cli": "npm run build:packages && npm run start -w @app/cli --",
+    "ask": "npm run build:packages && npm run start -w @app/cli -- --once",
+    "test": "npm run build:packages && npm run test --workspaces --if-present",
+    "eval": "npm run build -w @app/shared && npm run eval -w @app/agent",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6",
+    "eslint": "^10.10.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
