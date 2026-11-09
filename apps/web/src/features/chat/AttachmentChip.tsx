@@ -13,8 +13,8 @@ const KIND_LABELS: Record<AttachmentKind, string> = {
 
 /**
  * One attached file: a thumbnail for images, a tinted file icon otherwise, then its name and
- * size. In the composer it shows the upload and can be removed; in a sent message it opens
- * (downloads) the file.
+ * size. In the composer it shows the upload, opens an image's preview and can be removed; in a
+ * sent message it opens (downloads) the file.
  */
 export function AttachmentChip({
   name,
@@ -22,6 +22,7 @@ export function AttachmentChip({
   kind,
   previewUrl,
   onOpen,
+  onPreview,
   status = 'ready',
   error,
   onRemove,
@@ -31,6 +32,8 @@ export function AttachmentChip({
   kind: AttachmentKind;
   previewUrl?: string | null;
   onOpen?: () => void;
+  /** opens the image large (the composer's chips) */
+  onPreview?: () => void;
   status?: 'uploading' | 'ready' | 'error';
   error?: string | null;
   onRemove?: () => void;
@@ -83,7 +86,18 @@ export function AttachmentChip({
     </button>
   ) : (
     <div className={frame}>
-      {body}
+      {onPreview ? (
+        <button
+          type="button"
+          onClick={onPreview}
+          title={`Preview ${name}`}
+          className="-my-1.5 -ml-1.5 flex min-w-0 flex-1 cursor-zoom-in items-center gap-2.5 rounded-xl py-1.5 pl-1.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          {body}
+        </button>
+      ) : (
+        body
+      )}
       {onRemove && (
         <button
           type="button"

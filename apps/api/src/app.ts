@@ -100,7 +100,7 @@ export function createApp(context: AppContext) {
 
   const v1 = express.Router();
   v1.use(authConfigRouter(context.auth));
-  // Everything below needs a signed-in user when sign-in is on.
+  // Everything below needs a signed-in user when sign-in is required (a guest's otherwise).
   v1.use(requireUser(context.auth));
   v1.use(authRouter());
   v1.use(infoRouter(context));

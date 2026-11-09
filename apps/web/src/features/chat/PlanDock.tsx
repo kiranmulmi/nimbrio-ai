@@ -44,7 +44,7 @@ export function PlanDock({ state }: { state: PlanState }) {
   return (
     <div className="shrink-0 px-4 sm:px-6">
       <section
-        aria-label="Plan"
+        aria-label="Task"
         className="chat-card mx-auto w-full max-w-[1000px] overflow-hidden"
       >
         <button
@@ -63,7 +63,7 @@ export function PlanDock({ state }: { state: PlanState }) {
             )}
           </span>
           <span className="shrink-0 text-[12.5px] font-bold text-ink">
-            Plan{' '}
+            Task{' '}
             <span className="font-semibold tabular-nums text-ink-3">
               {counts.done}/{counts.total}
             </span>

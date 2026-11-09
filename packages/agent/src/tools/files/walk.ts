@@ -75,28 +75,47 @@ export async function* walk(
 /**
  * Every file in a workspace folder (generated folders left out), for the Files panel, and
  * the folders with nothing in them (they'd otherwise be missing from a tree of files).
+ *
+ * Breadth-first, level by level: past `limit`, it's the deepest files that are left out, so
+ * the top of the tree (README, package.json, every top-level folder) is always there.
  */
 export async function listWorkspaceFiles(
   dir: string,
   limit: number,
 ): Promise<{ files: string[]; emptyFolders: string[]; isTruncated: boolean }> {
   const files: string[] = [];
-  const childCount = new Map<string, number>();
-  const parentOf = (relative: string) => relative.slice(0, Math.max(0, relative.lastIndexOf('/')));
-  const emptyFolders = () =>
-    [...childCount].filter(([, count]) => count === 0).map(([folder]) => folder);
-  for await (const entry of walk(dir)) {
-    const parent = parentOf(entry.relative);
-    if (parent) childCount.set(parent, (childCount.get(parent) ?? 0) + 1);
-    if (entry.isDirectory) {
-      if (!entry.isSkipped) childCount.set(entry.relative, 0);
-      continue;
+  // Only folders actually read: one not reached yet isn't known to be empty.
+  const emptyFolders: string[] = [];
+  let level: string[] = [''];
+  while (level.length > 0) {
+    const next: string[] = [];
+    for (const relative of level) {
+      let entries: Dirent[];
+      try {
+        entries = await fs.readdir(relative ? path.join(dir, relative) : dir, {
+          withFileTypes: true,
+        });
+      } catch {
+        continue; // unreadable folder: skip it rather than fail the whole listing
+      }
+      entries = entries.filter(
+        (entry) => !SKIPPED_FILES.has(entry.name) && !isInAppData(entry.name),
+      );
+      if (entries.length === 0 && relative) emptyFolders.push(relative);
+      entries.sort((a, b) => a.name.localeCompare(b.name));
+      for (const entry of entries) {
+        const child = relative ? `${relative}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          if (!SKIPPED_FOLDERS.has(entry.name)) next.push(child);
+          continue;
+        }
+        if (files.length === limit) return { files, emptyFolders, isTruncated: true };
+        files.push(child);
+      }
     }
-    // Cut short, a folder not walked yet looks empty: leave them out rather than guess.
-    if (files.length === limit) return { files, emptyFolders: [], isTruncated: true };
-    files.push(entry.relative);
+    level = next;
   }
-  return { files, emptyFolders: emptyFolders(), isTruncated: false };
+  return { files, emptyFolders, isTruncated: false };
 }
 
 /** The real workspace folder and a model-supplied path resolved inside it. */

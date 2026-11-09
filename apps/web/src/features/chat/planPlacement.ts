@@ -4,7 +4,10 @@ import type { Turn } from './conversation';
 
 export interface PlacedPlan {
   plan: Plan;
-  /** The chat shows this plan's steps inline, where the agent worked on them. */
+  /**
+   * The chat shows this plan's steps inline, where the agent worked on them, or will: the
+   * current plan before its first step starts counts too, so it doesn't flash the full card.
+   */
   hasInlineSteps: boolean;
 }
 
@@ -36,7 +39,10 @@ export function placePlans(turns: readonly Turn[], state: PlanState): Map<string
       used.add(index);
       next = index + 1;
       const plan = plans[index];
-      if (plan) placed.set(item.key, { plan, hasInlineSteps: withSteps.has(item.key) });
+      if (!plan) continue;
+      const isUnstarted =
+        plan === state.plan && plan.steps.every((step) => step.status === 'pending');
+      placed.set(item.key, { plan, hasInlineSteps: withSteps.has(item.key) || isUnstarted });
     }
   }
   return placed;

@@ -438,6 +438,25 @@ export function SignOutIcon({ size = 14, ...rest }: IconProps) {
   );
 }
 
+/** An arrow down onto a tray: download. */
+export function DownloadIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M8 2v8M4.75 6.75 8 10l3.25-3.25M2.5 11.5v1a1.5 1.5 0 0 0 1.5 1.5h8a1.5 1.5 0 0 0 1.5-1.5v-1" />
+    </svg>
+  );
+}
+
+/** An arrow going into a door: sign in. */
+export function SignInIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M6.5 2.5h5a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-5" />
+      <path d="M2 8h7M6.5 5.5 9 8l-2.5 2.5" />
+    </svg>
+  );
+}
+
 /** An open book with a bookmark: a skill (instructions for a kind of task). */
 export function SkillIcon({ size = 14, ...rest }: IconProps) {
   return (

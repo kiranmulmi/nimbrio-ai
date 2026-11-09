@@ -35,6 +35,7 @@ import {
   type PathMention,
 } from './pathMentions';
 import { AttachmentChip } from './AttachmentChip';
+import { ImagePreview, type PreviewImage } from './ImagePreview';
 import { ChatUsageLine } from './ChatUsageLine';
 import type { ConversationState } from './conversation';
 import type { ReturnedDraft } from './useConversation';
@@ -153,6 +154,14 @@ export function Composer({
   const ref = useRef<HTMLTextAreaElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const files = useDraftAttachments(workspaceId);
+  // The attached image open in the previewer, by its draft key.
+  const [previewKey, setPreviewKey] = useState<string | null>(null);
+  const previewImages: PreviewImage[] = files.drafts.flatMap((draft) =>
+    draft.previewUrl
+      ? [{ key: draft.key, name: draft.name, size: draft.size, url: draft.previewUrl }]
+      : [],
+  );
+  const previewAt = previewImages.findIndex((image) => image.key === previewKey);
   const hasContent = value.trim() !== '' || files.ready.length > 0;
   const isSteering = isRunning && onSteer !== undefined;
   const canSubmit = isSteering
@@ -286,11 +295,20 @@ export function Composer({
                 size={draft.size}
                 kind={draft.attachment?.kind ?? attachmentKind(draft.name, '')}
                 previewUrl={draft.previewUrl}
+                onPreview={draft.previewUrl ? () => setPreviewKey(draft.key) : undefined}
                 status={draft.status}
                 error={draft.error}
                 onRemove={() => files.remove(draft.key)}
               />
             ))}
+            {previewAt !== -1 && (
+              <ImagePreview
+                images={previewImages}
+                startAt={previewAt}
+                workspaceId={workspaceId}
+                onClose={() => setPreviewKey(null)}
+              />
+            )}
           </div>
         )}
         <div className="relative">

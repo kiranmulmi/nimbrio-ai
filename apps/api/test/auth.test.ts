@@ -12,6 +12,7 @@ const SETTINGS: AuthSettings = {
   supabaseUrl: 'https://abcd.supabase.co',
   supabaseAnonKey: 'anon-key',
   allowedEmails: [],
+  isRequired: true,
 };
 
 const NOW = 1_000_000;
@@ -45,8 +46,21 @@ test('with sign-in on, the config names the project and requests need a valid to
     isEnabled: true,
     supabaseUrl: 'https://abcd.supabase.co',
     supabaseAnonKey: 'anon-key',
+    isRequired: true,
   });
   await assert.rejects(auth.userFor(undefined), UnauthorizedError);
+  await assert.rejects(auth.userFor('good'), UnauthorizedError, 'needs the Bearer scheme');
+  await assert.rejects(auth.userFor('Bearer bad'), /Sign in again/);
+  assert.deepEqual(await auth.userFor('Bearer good'), { id: 'user-1', email: 'me@example.com' });
+});
+
+test('with sign-in optional, a request without a token is a guest, a token sent is still checked', async () => {
+  const { verify, asked } = fakeVerifier(valid());
+  const auth = createAuthService({ ...SETTINGS, isRequired: false }, verify, () => NOW);
+  assert.equal(auth.config.isEnabled && auth.config.isRequired, false);
+  assert.equal(await auth.userFor(undefined), null);
+  assert.equal(await auth.userFor('  '), null);
+  assert.equal(asked.length, 0);
   await assert.rejects(auth.userFor('good'), UnauthorizedError, 'needs the Bearer scheme');
   await assert.rejects(auth.userFor('Bearer bad'), /Sign in again/);
   assert.deepEqual(await auth.userFor('Bearer good'), { id: 'user-1', email: 'me@example.com' });
@@ -75,7 +89,13 @@ test('only the allowed emails get in, in any case', async () => {
 });
 
 test('sign-in settings come from .env: both values or neither', () => {
-  const base = { ...env, SUPABASE_URL: '', SUPABASE_ANON_KEY: '', AUTH_ALLOWED_EMAILS: '' };
+  const base = {
+    ...env,
+    SUPABASE_URL: '',
+    SUPABASE_ANON_KEY: '',
+    AUTH_ALLOWED_EMAILS: '',
+    SIGN_IN_REQUIRED: 'false' as const,
+  };
   assert.equal(readAuthSettings(base), null);
   assert.throws(
     () => readAuthSettings({ ...base, SUPABASE_URL: 'https://abcd.supabase.co' }),
@@ -101,7 +121,17 @@ test('sign-in settings come from .env: both values or neither', () => {
       supabaseUrl: 'https://abcd.supabase.co',
       supabaseAnonKey: 'k',
       allowedEmails: ['me@example.com', 'you@example.com'],
+      isRequired: false,
     },
+  );
+  assert.equal(
+    readAuthSettings({
+      ...base,
+      SUPABASE_URL: 'https://abcd.supabase.co',
+      SUPABASE_ANON_KEY: 'k',
+      SIGN_IN_REQUIRED: 'true',
+    })?.isRequired,
+    true,
   );
 });
 

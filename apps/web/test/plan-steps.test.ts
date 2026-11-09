@@ -185,6 +185,19 @@ test('a reloaded chat shows the steps inline the same way', () => {
   assert.equal(placed[0]?.hasInlineSteps, true);
 });
 
+test('a plan just made, before its first step starts, already shows only its goal', () => {
+  const fresh: Plan = {
+    ...plan,
+    steps: plan.steps.map((step) => ({ ...step, status: 'pending' as const })),
+  };
+  const state = run([
+    ...call('create_plan', { goal: 'Fix the bug', steps: [], done_when: '' }),
+    { type: 'plan', plan: fresh },
+  ]);
+  const placed = [...placePlans(state.turns, state.plan).values()];
+  assert.equal(placed[0]?.hasInlineSteps, true);
+});
+
 test('a plan without step updates keeps its full step list', () => {
   const state = run([
     ...call('create_plan', { goal: 'Fix the bug', steps: [], done_when: '' }),

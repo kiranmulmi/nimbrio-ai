@@ -4,8 +4,18 @@ import type { AppInfo, Workspace } from '@app/shared';
 import { Badge } from '../components/Badge';
 import { errorMessage } from '../lib/api';
 import { useAuth } from '../features/auth/authContext';
-import { ChevronDownIcon, ChevronRightIcon, GearIcon, SignOutIcon, SparkIcon } from '../lib/icons';
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  GearIcon,
+  SignInIcon,
+  SignOutIcon,
+  SparkIcon,
+} from '../lib/icons';
 import { usePopover } from '../lib/usePopover';
+
+const ACCOUNT_ITEM =
+  'flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] font-medium text-ink-2 transition-colors hover:bg-subtle hover:text-ink';
 
 const APPROVAL_TEXT = {
   ask: 'Asks before each tool that changes something',
@@ -164,20 +174,35 @@ export function ConnectionMenu({
           </div>
           {auth && (
             <div className="border-t border-line py-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  void auth.signOut();
-                }}
-                className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] font-medium text-ink-2 transition-colors hover:bg-subtle hover:text-ink"
-              >
-                <SignOutIcon size={13} className="text-ink-3" />
-                Sign out
-                <span className="ml-auto min-w-0 truncate text-[12px] font-normal text-ink-3">
-                  {auth.user.email}
-                </span>
-              </button>
+              {auth.kind === 'signedIn' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    void auth.signOut();
+                  }}
+                  className={ACCOUNT_ITEM}
+                >
+                  <SignOutIcon size={13} className="text-ink-3" />
+                  Sign out
+                  <span className="ml-auto min-w-0 truncate text-[12px] font-normal text-ink-3">
+                    {auth.user.email}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    auth.signIn();
+                  }}
+                  className={ACCOUNT_ITEM}
+                >
+                  <SignInIcon size={13} className="text-ink-3" />
+                  Sign in
+                  <span className="ml-auto text-[12px] font-normal text-ink-3">Guest</span>
+                </button>
+              )}
             </div>
           )}
         </div>

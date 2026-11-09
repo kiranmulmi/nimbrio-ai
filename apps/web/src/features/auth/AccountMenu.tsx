@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ChevronDownIcon, SignOutIcon } from '../../lib/icons';
+import { ChevronDownIcon, SignInIcon, SignOutIcon } from '../../lib/icons';
 import { usePopover } from '../../lib/usePopover';
-import { useAuth, type AuthState } from './authContext';
+import { useAuth, type Guest, type SignedIn } from './authContext';
 
 const ITEM =
   'flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-[13px] outline-none transition-colors hover:bg-subtle focus-visible:bg-subtle';
@@ -17,7 +17,7 @@ export function initialsOf(name: string | null, email: string | null): string {
 }
 
 /** The provider's photo, or the user's initials when there is none or it won't load. */
-function Avatar({ auth, size }: { auth: AuthState; size: number }) {
+function Avatar({ auth, size }: { auth: SignedIn; size: number }) {
   const [hasFailed, setHasFailed] = useState(false);
   const { avatarUrl, name } = auth.profile;
   if (avatarUrl && !hasFailed) {
@@ -45,14 +45,43 @@ function Avatar({ auth, size }: { auth: AuthState; size: number }) {
   );
 }
 
+/** A guest's row at the foot of the chats sidebar: signing in is offered, never needed. */
+function GuestRow({ guest }: { guest: Guest }) {
+  return (
+    <div className="shrink-0 border-t border-line-2">
+      <button
+        type="button"
+        onClick={guest.signIn}
+        className="flex h-14 w-full min-w-0 items-center gap-2.5 px-4 text-left transition-colors hover:bg-subtle"
+      >
+        <span
+          aria-hidden
+          className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-surface-2 text-ink-3"
+        >
+          <SignInIcon size={14} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13.5px] font-semibold text-ink">Sign in</span>
+          <span className="block truncate text-[12px] text-ink-3">Using the app as a guest</span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
 /**
  * Who is signed in, at the foot of the chats sidebar: photo or initials, name and email, and a
- * menu (opening upward) with Sign out. Nothing when the app runs without sign-in.
+ * menu (opening upward) with Sign out; Sign in for a guest. Nothing when the app runs without
+ * sign-in.
  */
 export function AccountMenu() {
   const auth = useAuth();
-  const { isOpen, setIsOpen, ref } = usePopover<HTMLDivElement>();
   if (!auth) return null;
+  return auth.kind === 'guest' ? <GuestRow guest={auth} /> : <SignedInMenu auth={auth} />;
+}
+
+function SignedInMenu({ auth }: { auth: SignedIn }) {
+  const { isOpen, setIsOpen, ref } = usePopover<HTMLDivElement>();
   const { email } = auth.user;
   const name = auth.profile.name ?? email?.split('@')[0] ?? 'Signed in';
 

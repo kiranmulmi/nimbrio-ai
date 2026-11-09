@@ -3,11 +3,23 @@ import { LogoIcon } from '../lib/icons';
 
 /**
  * The app's logo and name ("Nimbrio AI", with "AI" in the accent colour), linking home.
- * `isNameHiddenOnPhone` keeps a narrow top bar tidy.
+ * `isNameHiddenOnPhone` keeps a narrow top bar tidy. `isHiddenInDesktopApp` drops the brand
+ * where the desktop app's window already carries the name (html[data-desktop]).
  */
-export function BrandLink({ isNameHiddenOnPhone = false }: { isNameHiddenOnPhone?: boolean }) {
+export function BrandLink({
+  isNameHiddenOnPhone = false,
+  isHiddenInDesktopApp = false,
+}: {
+  isNameHiddenOnPhone?: boolean;
+  isHiddenInDesktopApp?: boolean;
+}) {
   return (
-    <Link to="/" className="flex shrink-0 items-center gap-2.5 rounded-lg pr-1">
+    <Link
+      to="/"
+      className={`flex shrink-0 items-center gap-2.5 rounded-lg pr-1 ${
+        isHiddenInDesktopApp ? '[[data-desktop]_&]:hidden' : ''
+      }`}
+    >
       <span className="brand-mark" aria-hidden>
         <LogoIcon />
       </span>

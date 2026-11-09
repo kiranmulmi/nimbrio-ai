@@ -17,9 +17,9 @@ export class ApiError extends Error {
 
 /** How requests prove who is signed in (`features/auth/AuthGate`); null when sign-in is off. */
 export interface AuthHandlers {
-  /** the current access token, renewed when it's about to run out */
+  /** the current access token, renewed when it's about to run out; null for a guest */
   accessToken: () => Promise<string | null>;
-  /** the API no longer accepts the token: show the login page */
+  /** the API no longer accepts the token: sign out (to the login page, or as a guest) */
   onSignedOut: () => void;
 }
 

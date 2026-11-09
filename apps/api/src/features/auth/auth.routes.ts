@@ -13,8 +13,9 @@ export function authConfigRouter(auth: AuthService): Router {
 }
 
 /**
- * Every /v1 route after this needs a signed-in user (when sign-in is on): the request's
- * `Authorization: Bearer <access token>`. The user is kept in `res.locals.user`.
+ * Checks who a request is signed in as, from its `Authorization: Bearer <access token>`, and
+ * keeps the user in `res.locals.user`. Every /v1 route after this needs a signed-in user when
+ * sign-in is required; when it's only offered, a request without a token is a guest's (null).
  */
 export function requireUser(auth: AuthService): RequestHandler {
   return asyncHandler(async (req, res, next) => {
@@ -23,7 +24,7 @@ export function requireUser(auth: AuthService): RequestHandler {
   });
 }
 
-/** Who this request is signed in as; null when sign-in is off. */
+/** Who this request is signed in as; null when sign-in is off or for a guest. */
 export function authRouter(): Router {
   const router = Router();
   router.get('/auth/me', (_req, res) => {

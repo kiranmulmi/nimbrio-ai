@@ -392,6 +392,12 @@
     animation: live-ripple 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
+  /* "Thinking" bulb: a bright accent halo that swells and fades around the icon. */
+  .thinking-glow {
+    color: var(--accent);
+    animation: thinking-glow 1.6s ease-in-out infinite;
+  }
+
   /* Behind the empty chat: a soft teal glow and a faint dot grid that fades out. */
   .dot-grid {
     background-image:
@@ -554,9 +560,24 @@
 
   @media (prefers-reduced-motion: reduce) {
     .markdown.is-streaming > :last-child::after,
-    .live-dot::after {
+    .live-dot::after,
+    .thinking-glow {
       animation: none;
     }
+  }
+}
+
+@keyframes thinking-glow {
+  0%,
+  100% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 0 transparent);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 9px var(--accent));
+    transform: scale(1.12);
   }
 }
 

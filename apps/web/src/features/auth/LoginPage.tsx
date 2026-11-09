@@ -57,12 +57,15 @@ export function LoginPage({
   supabaseUrl,
   anonKey,
   redirectError,
+  onSkip,
 }: {
   client: SupabaseClient;
   supabaseUrl: string;
   anonKey: string;
   /** Why the last sign-in through Google or an email link didn't finish. */
   redirectError: string | null;
+  /** Back to the app without signing in; absent when sign-in is required. */
+  onSkip?: () => void;
 }) {
   const [view, setView] = useState<View>({ kind: 'signIn' });
   const [email, setEmail] = useState('');
@@ -271,7 +274,9 @@ export function LoginPage({
       subtitle={
         isSignUp
           ? 'Set up your account and start chatting with your agent.'
-          : 'Sign in to pick up where you left off.'
+          : onSkip
+            ? 'Sign in to pick up where you left off. You can also use the app without an account.'
+            : 'Sign in to pick up where you left off.'
       }
     >
       <ModeTabs isSignUp={isSignUp} onChange={(next) => go({ kind: next })} />
@@ -357,6 +362,15 @@ export function LoginPage({
           {isSignUp ? 'Sign in' : 'Create one'}
         </button>
       </p>
+      {onSkip && (
+        <button
+          type="button"
+          onClick={onSkip}
+          className="mx-auto mt-4 flex items-center gap-1.5 text-[13.5px] font-semibold text-ink-3 hover:text-ink focus-visible:text-ink focus-visible:outline-none"
+        >
+          Continue without signing in
+        </button>
+      )}
     </AuthCard>
   );
 }

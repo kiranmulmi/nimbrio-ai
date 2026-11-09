@@ -527,6 +527,7 @@ test(
       SUPABASE_ANON_KEY: 'anon',
       AUTH_ALLOWED_EMAILS: 'me@example.com',
       SIGN_IN: 'off',
+      SIGN_IN_REQUIRED: 'true',
     });
     assert.equal(env.PATH, '/bin');
     assert.equal(env.HOME, '/h');
@@ -539,6 +540,7 @@ test(
       'SUPABASE_ANON_KEY',
       'AUTH_ALLOWED_EMAILS',
       'SIGN_IN',
+      'SIGN_IN_REQUIRED',
     ])
       assert.equal(env[key], undefined, key);
   },
@@ -1452,6 +1454,18 @@ test('the Files panel search finds names and lines, skipping generated and app f
     files: ['greeting-notes.md', 'image.bin', 'src/Greeting.ts'],
     emptyFolders: ['docs/empty'],
     isTruncated: false,
+  });
+
+  // Past the limit, the deepest files are left out, never the top of the tree.
+  await fs.mkdir(path.join(dir, 'a', 'deep'), { recursive: true });
+  await fs.writeFile(path.join(dir, 'a', 'deep', 'one.ts'), '');
+  await fs.writeFile(path.join(dir, 'a', 'deep', 'two.ts'), '');
+  await fs.writeFile(path.join(dir, 'z-last.md'), '');
+  assert.deepEqual(await listWorkspaceFiles(dir, 4), {
+    files: ['greeting-notes.md', 'image.bin', 'z-last.md', 'src/Greeting.ts'],
+    // Cut off before docs/empty was read: not known to be empty, so left out.
+    emptyFolders: [],
+    isTruncated: true,
   });
 
   const contents = await searchFileContents(dir, 'hello', 100);

@@ -33,3 +33,5 @@ coverage/
 # Desktop app build output
 apps/desktop/.stage/
 apps/desktop/release/
+
+.mcp.json

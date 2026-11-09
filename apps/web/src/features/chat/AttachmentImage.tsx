@@ -1,39 +1,20 @@
-import { useEffect, useState } from 'react';
 import type { Attachment } from '@app/shared';
-import { fetchAttachment } from './api';
+import { useAttachmentUrl } from './useAttachmentUrl';
 
 /**
- * A sent image as a thumbnail that opens full size in a new tab. It's fetched with the
- * sign-in and shown from a blob URL, since an `<img src>` can't carry the access token.
+ * A sent image as a thumbnail that opens the previewer. It's fetched with the sign-in and
+ * shown from a blob URL, since an `<img src>` can't carry the access token.
  */
 export function AttachmentImage({
   workspaceId,
   image,
+  onOpen,
 }: {
   workspaceId: string;
   image: Attachment;
+  onOpen: () => void;
 }) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [isMissing, setIsMissing] = useState(false);
-
-  useEffect(() => {
-    let isCurrent = true;
-    let objectUrl: string | null = null;
-    setUrl(null);
-    setIsMissing(false);
-    fetchAttachment(workspaceId, image.id).then(
-      (blob) => {
-        if (!isCurrent) return;
-        objectUrl = URL.createObjectURL(blob);
-        setUrl(objectUrl);
-      },
-      () => isCurrent && setIsMissing(true),
-    );
-    return () => {
-      isCurrent = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [workspaceId, image.id]);
+  const { url, isMissing } = useAttachmentUrl(workspaceId, image.id);
 
   const frame =
     'block overflow-hidden rounded-2xl border border-line bg-subtle shadow-card transition-opacity hover:opacity-90';
@@ -48,8 +29,14 @@ export function AttachmentImage({
     );
   }
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" title={image.name} className={frame}>
+    <button
+      type="button"
+      onClick={onOpen}
+      title={`Preview ${image.name}`}
+      aria-label={`Preview ${image.name}`}
+      className={`${frame} cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent`}
+    >
       <img src={url} alt={image.name} className="h-28 w-auto max-w-[240px] object-cover sm:h-36" />
-    </a>
+    </button>
   );
 }

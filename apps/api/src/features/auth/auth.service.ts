@@ -17,7 +17,10 @@ export type VerifyToken = (token: string) => Promise<VerifiedToken | null>;
 
 export interface AuthService {
   config: AuthConfig;
-  /** The user a request's bearer token belongs to; null when sign-in is off. */
+  /**
+   * The user a request's bearer token belongs to; null when sign-in is off, or for a request
+   * without a token when sign-in isn't required (a guest). A token sent is always checked.
+   */
   userFor(authorization: string | undefined): Promise<AuthUser | null>;
 }
 
@@ -102,9 +105,12 @@ export function createAuthService(
       isEnabled: true,
       supabaseUrl: settings.supabaseUrl,
       supabaseAnonKey: settings.supabaseAnonKey,
+      isRequired: settings.isRequired,
     },
     async userFor(authorization) {
-      const token = /^Bearer\s+(\S+)$/i.exec(authorization?.trim() ?? '')?.[1];
+      const header = authorization?.trim() ?? '';
+      if (!header && !settings.isRequired) return null;
+      const token = /^Bearer\s+(\S+)$/i.exec(header)?.[1];
       if (!token) throw new UnauthorizedError();
       const result = await verified(token);
       if (!result) throw new UnauthorizedError('Your sign-in has ended. Sign in again.');

@@ -130,7 +130,7 @@ export function ChatSidebar({
       >
         <SidebarResizer width={width.width} onResize={width.setWidth} onReset={width.reset} />
         <div className="titlebar flex h-12 shrink-0 items-center gap-1 border-b border-line pl-[calc(1rem+var(--titlebar-inset))] pr-2">
-          <BrandLink />
+          <BrandLink isHiddenInDesktopApp />
           <IconButton onClick={onClose} aria-label="Hide chats" className="ml-auto xl:hidden">
             <ChevronRightIcon size={12} className="rotate-180" />
           </IconButton>

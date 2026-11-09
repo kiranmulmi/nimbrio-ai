@@ -10,11 +10,21 @@ export interface AuthProfile {
 }
 
 /** The signed-in user, and how to sign out. */
-export interface AuthState {
+export interface SignedIn {
+  kind: 'signedIn';
   user: AuthUser;
   profile: AuthProfile;
   signOut: () => Promise<void>;
 }
+
+/** Using the app without signing in, where sign-in is offered but not required. */
+export interface Guest {
+  kind: 'guest';
+  /** shows the login page */
+  signIn: () => void;
+}
+
+export type AuthState = SignedIn | Guest;
 
 /** null when the app runs without sign-in. */
 export const AuthContext = createContext<AuthState | null>(null);

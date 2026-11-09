@@ -18,8 +18,9 @@ type Access =
   | { kind: 'failed'; error: unknown };
 
 /**
- * Shows the app only to a signed-in user when the API has sign-in on (`GET /v1/auth/config`),
- * and the login page otherwise. Every API request then carries the Supabase access token.
+ * Reads whether the API offers sign-in (`GET /v1/auth/config`). Off: the app as is. Required:
+ * the login page until there is a session. Optional: the app straight away as a guest, with the
+ * login page when the user asks for it. A signed-in user's requests carry the access token.
  */
 export function AuthGate({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<AuthConfig | null>(null);
@@ -68,22 +69,24 @@ export function AuthGate({ children }: { children: ReactNode }) {
     return <AuthContext.Provider value={null}>{children}</AuthContext.Provider>;
   }
   return (
-    <SignedInOnly
+    <SignInGate
       client={client}
       supabaseUrl={config.supabaseUrl}
       anonKey={config.supabaseAnonKey}
+      isRequired={config.isRequired}
       redirectError={redirect.error}
       isRecoveryLink={redirect.isRecovery}
     >
       {children}
-    </SignedInOnly>
+    </SignInGate>
   );
 }
 
-function SignedInOnly({
+function SignInGate({
   client,
   supabaseUrl,
   anonKey,
+  isRequired,
   redirectError,
   isRecoveryLink,
   children,
@@ -91,6 +94,7 @@ function SignedInOnly({
   client: SupabaseClient;
   supabaseUrl: string;
   anonKey: string;
+  isRequired: boolean;
   redirectError: string | null;
   isRecoveryLink: boolean;
   children: ReactNode;
@@ -102,6 +106,8 @@ function SignedInOnly({
   const [access, setAccess] = useState<Access>({ kind: 'checking' });
   // Signed in by a reset-password link: a new password comes first.
   const [isSettingPassword, setIsSettingPassword] = useState(isRecoveryLink);
+  // A guest who asked for the login page (or came back from a sign-in that failed).
+  const [isSigningIn, setIsSigningIn] = useState(redirectError !== null);
 
   useEffect(() => {
     setAuthHandlers({
@@ -113,6 +119,7 @@ function SignedInOnly({
       setUserId(session?.user.id ?? null);
       setEmail(session?.user.email ?? null);
       setProfile(profileOf(session?.user));
+      if (session) setIsSigningIn(false);
       if (event === 'PASSWORD_RECOVERY') setIsSettingPassword(true);
       if (event === 'SIGNED_OUT') setIsSettingPassword(false);
     });
@@ -149,6 +156,7 @@ function SignedInOnly({
     () =>
       access.kind === 'allowed'
         ? {
+            kind: 'signedIn',
             user: access.user,
             profile,
             signOut: async () => {
@@ -158,15 +166,23 @@ function SignedInOnly({
         : null,
     [access, client, profile],
   );
+  const guest = useMemo<AuthState>(
+    () => ({ kind: 'guest', signIn: () => setIsSigningIn(true) }),
+    [],
+  );
 
   if (userId === undefined) return <PageLoader />;
   if (userId === null) {
+    if (!isRequired && !isSigningIn) {
+      return <AuthContext.Provider value={guest}>{children}</AuthContext.Provider>;
+    }
     return (
       <LoginPage
         client={client}
         supabaseUrl={supabaseUrl}
         anonKey={anonKey}
         redirectError={redirectError}
+        onSkip={isRequired ? undefined : () => setIsSigningIn(false)}
       />
     );
   }
@@ -184,9 +200,24 @@ function SignedInOnly({
             ? access.message
             : errorMessage(access.error, 'The server did not accept the sign-in.')}
         </p>
-        <Button className="mt-5 w-full" onClick={() => void client.auth.signOut()}>
+        <Button
+          className="mt-5 w-full"
+          onClick={() => {
+            setIsSigningIn(true);
+            void client.auth.signOut();
+          }}
+        >
           Sign in with another account
         </Button>
+        {!isRequired && (
+          <Button
+            variant="plain"
+            className="mt-2 w-full"
+            onClick={() => void client.auth.signOut({ scope: 'local' })}
+          >
+            Continue without signing in
+          </Button>
+        )}
       </AuthCard>
     );
   }

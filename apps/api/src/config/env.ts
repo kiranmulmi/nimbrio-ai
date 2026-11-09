@@ -18,6 +18,8 @@ const schema = z.object({
   AUTH_ALLOWED_EMAILS: z.string().default(''),
   /** `off` keeps sign-in off even with the Supabase values set (the desktop app sets it). */
   SIGN_IN: z.enum(['auto', 'off']).default('auto'),
+  /** `true` makes everyone sign in before using the app; by default signing in is a choice. */
+  SIGN_IN_REQUIRED: z.enum(['true', 'false']).default('false'),
 });
 
 export const env = schema.parse(process.env);
@@ -28,6 +30,8 @@ export interface AuthSettings {
   supabaseAnonKey: string;
   /** lower-case; empty means every user of the project */
   allowedEmails: string[];
+  /** Whether requests without a sign-in are refused, or served as a guest's. */
+  isRequired: boolean;
 }
 
 /** Read the sign-in settings; half of them set is a mistake worth stopping for. */
@@ -58,6 +62,7 @@ export function readAuthSettings(values: typeof env): AuthSettings | null {
     allowedEmails: values.AUTH_ALLOWED_EMAILS.split(',')
       .map((email) => email.trim().toLowerCase())
       .filter(Boolean),
+    isRequired: values.SIGN_IN_REQUIRED === 'true',
   };
 }
 

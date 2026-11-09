@@ -633,7 +633,7 @@ function applyEvent(state: ConversationState, event: RunEvent, at: number): Conv
       plan = { ...plan, activity: 'Writing up what was found' };
       break;
     case 'model_call':
-      draft.setStatus(event.step > 1 ? `Thinking… (step ${event.step})` : 'Thinking…');
+      draft.setStatus('Thinking…');
       plan = { ...plan, activity: 'Thinking about the next step' };
       break;
     case 'context':
