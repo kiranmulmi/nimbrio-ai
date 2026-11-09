@@ -2,15 +2,20 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { PageLoader } from '../../components/PageLoader';
 import { errorMessage } from '../../lib/api';
+import { readLastWorkspaceId } from './lastWorkspace';
 import { useWorkspaces } from './useWorkspaces';
 
-/** `/`: opens the first workspace, or the create form when there are none yet. */
+/**
+ * `/`: opens the workspace used last (or the first one if that's unknown or gone),
+ * or the create form when there are none yet.
+ */
 export function RootRedirect() {
   const { data, error, isLoading, reload } = useWorkspaces();
 
   if (data) {
-    const [first] = data;
-    return <Navigate to={first ? `/workspaces/${first.id}` : '/workspaces/new'} replace />;
+    const lastId = readLastWorkspaceId();
+    const target = data.find((workspace) => workspace.id === lastId) ?? data[0];
+    return <Navigate to={target ? `/workspaces/${target.id}` : '/workspaces/new'} replace />;
   }
 
   if (isLoading) return <PageLoader label="Loading workspaces…" />;

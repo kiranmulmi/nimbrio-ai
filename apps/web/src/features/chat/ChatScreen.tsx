@@ -17,6 +17,7 @@ import { usePanelWidth } from '../panel/usePanelWidth';
 import { useWorkspace } from '../workspaces/useWorkspace';
 import { useWorkspaces } from '../workspaces/useWorkspaces';
 import { onWorkspaceSaved } from '../workspaces/workspaceEvents';
+import { rememberLastWorkspace } from '../workspaces/lastWorkspace';
 import { improvePrompt } from './api';
 import { ChatHeader } from './ChatHeader';
 import { ChatSidebar } from './ChatSidebar';
@@ -118,6 +119,12 @@ export function ChatScreen({
     },
   });
   const { isBusy } = conversation;
+
+  // Opened fine: this is the workspace to come back to on the next launch.
+  const loadedWorkspaceId = workspace.data?.id;
+  useEffect(() => {
+    if (loadedWorkspaceId) rememberLastWorkspace(loadedWorkspaceId);
+  }, [loadedWorkspaceId]);
 
   useEffect(() => {
     if (!isNotFound(workspace.error)) return;
