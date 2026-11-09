@@ -69,12 +69,16 @@ async function readPdf(attachment: Attachment, bytes: Buffer, startPage = 1): Pr
   return `[${attachment.name}: pages ${first}-${last} of ${totalPages}.${more}]\n${shown.join('\n\n')}`;
 }
 
-export const readAttachment = defineTool<{ id: string; start_page?: number; start_line?: number }>({
+export const readAttachment = defineTool<{
+  attachment_id: string;
+  start_page?: number;
+  start_line?: number;
+}>({
   name: 'read_attachment',
   description:
     'Read the text of a file the user attached to the chat: a PDF, a Word document (.docx) or a text file (code, CSV, JSON, Markdown, ...). Call this whenever the user refers to an attached file. PDFs come back page by page (continue with start_page), other files line by line (continue with start_line). For images use view_image.',
   properties: {
-    id: { type: 'string', description: "The attachment's id, from the user's message." },
+    attachment_id: { type: 'string', description: "The attachment's id, from the user's message." },
     start_page: { type: 'integer', description: 'PDFs: first page to read (1-based). Default 1.' },
     start_line: {
       type: 'integer',
@@ -82,7 +86,7 @@ export const readAttachment = defineTool<{ id: string; start_page?: number; star
     },
   },
   optional: ['start_page', 'start_line'],
-  async run({ id, start_page: startPage, start_line: startLine }, ctx) {
+  async run({ attachment_id: id, start_page: startPage, start_line: startLine }, ctx) {
     const attachment = await findAttachment(ctx, id);
     if (attachment.kind === 'image') {
       throw new Error(`"${attachment.name}" is an image; look at it with view_image instead.`);
@@ -104,14 +108,14 @@ export const readAttachment = defineTool<{ id: string; start_page?: number; star
   },
 });
 
-export const viewImage = defineTool<{ id: string }>({
+export const viewImage = defineTool<{ attachment_id: string }>({
   name: 'view_image',
   description:
     'Look at an image the user attached to the chat (PNG, JPEG, GIF or WebP): a screenshot, a photo, a diagram, a design. Call this before answering anything about the image. The image is shown to you in the next message. Needs a model that can see images.',
   properties: {
-    id: { type: 'string', description: "The attachment's id, from the user's message." },
+    attachment_id: { type: 'string', description: "The attachment's id, from the user's message." },
   },
-  async run({ id }, ctx) {
+  async run({ attachment_id: id }, ctx) {
     const attachment = await findAttachment(ctx, id);
     if (attachment.kind !== 'image') {
       throw new Error(
@@ -123,19 +127,19 @@ export const viewImage = defineTool<{ id: string }>({
   },
 });
 
-export const saveAttachment = defineTool<{ id: string; path: string }>({
+export const saveAttachment = defineTool<{ attachment_id: string; path: string }>({
   name: 'save_attachment',
   description:
     'Copy a file the user attached into the workspace folder, e.g. to put an uploaded logo into a website or a data file next to the script that reads it. Call this only when the file should become part of the project. Never overwrites: it fails if the path exists.',
   properties: {
-    id: { type: 'string', description: "The attachment's id, from the user's message." },
+    attachment_id: { type: 'string', description: "The attachment's id, from the user's message." },
     path: {
       type: 'string',
       description: 'Where to save it, relative to the workspace folder, with the file name.',
     },
   },
   needsApproval: true,
-  async run({ id, path: requested }, ctx) {
+  async run({ attachment_id: id, path: requested }, ctx) {
     const attachment = await findAttachment(ctx, id);
     const destination = await locate(ctx, requested);
     await assertCanChange(destination.root, destination.target);

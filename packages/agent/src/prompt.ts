@@ -275,7 +275,7 @@ const KIND_LABELS: Record<Attachment['kind'], string> = {
 /** The list of files the user attached, put after their message. */
 export function attachmentContext(attachments: readonly Attachment[]): string {
   const lines = attachments.map(
-    (a) => `- "${a.name}" (${KIND_LABELS[a.kind]}, ${formatBytes(a.size)}) id: ${a.id}`,
+    (a) => `- "${a.name}" (${KIND_LABELS[a.kind]}, ${formatBytes(a.size)}) attachment_id: ${a.id}`,
   );
   return `[Files the user attached to this message. Added by the agent framework]\n${lines.join('\n')}\n[Read them with read_attachment, look at images with view_image.]`;
 }

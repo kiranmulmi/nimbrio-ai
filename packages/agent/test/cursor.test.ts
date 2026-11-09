@@ -12,7 +12,12 @@ import {
   startCursorLogin,
   type CursorFetch,
 } from '../src/cursor/auth.js';
-import { composerReply, conversationText, toUsage } from '../src/cursor/caller.js';
+import {
+  composerReply,
+  conversationImages,
+  conversationText,
+  toUsage,
+} from '../src/cursor/caller.js';
 import { parseAgentOrigin, parseCursorModels } from '../src/cursor/client.js';
 import {
   MCP_SERVER,
@@ -217,6 +222,39 @@ test('the run request carries the text, the model with its settings and our tool
   assert.deepEqual(decodeValue(bytesOf(tool, 3) ?? Buffer.alloc(0)), { type: 'object' });
 });
 
+test('images go in the user message as selected images: data, uuid and mime type', () => {
+  const data = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  const runRequest = decodeFields(
+    bytesOf(
+      decodeFields(
+        onlyPayload(
+          encodeRunRequest({
+            modelId: 'glm-5p3',
+            parameters: [],
+            userText: 'see image 1',
+            images: [{ data, mimeType: 'image/png' }],
+            tools: [],
+          }),
+        ),
+      ),
+      1,
+    ) ?? Buffer.alloc(0),
+  );
+  const userMessage = decodeFields(
+    bytesOf(
+      decodeFields(
+        bytesOf(decodeFields(bytesOf(runRequest, 2) ?? Buffer.alloc(0)), 1) ?? Buffer.alloc(0),
+      ),
+      1,
+    ) ?? Buffer.alloc(0),
+  );
+  const context = decodeFields(bytesOf(userMessage, 3) ?? Buffer.alloc(0));
+  const image = decodeFields(bytesOf(context, 1) ?? Buffer.alloc(0));
+  assert.ok(bytesOf(image, 8)?.equals(data));
+  assert.match(stringOf(image, 2), /^[0-9a-f-]{36}$/);
+  assert.equal(stringOf(image, 7), 'image/png');
+});
+
 /** An AgentServerMessage carrying one exec request. */
 const execMessage = (variantField: number, variant: Buffer[], id = 7, execId = 'e-1') =>
   messageField(2, [uintField(1, id), stringField(15, execId), messageField(variantField, variant)]);
@@ -396,6 +434,47 @@ test('the conversation becomes one labelled text, tool calls and results include
   assert.equal(
     conversationText({ system: 'S', messages: [{ role: 'user', content: 'Hi' }] }, false),
     'S\n\nHi',
+  );
+});
+
+test('images view_image opened go with the request, numbered in the text', () => {
+  const png = Buffer.from('fake png bytes');
+  const request = {
+    system: 'S',
+    messages: [
+      { role: 'user' as const, content: 'What is in these?' },
+      { role: 'tool' as const, tool_call_id: 'c1', content: 'shown next' },
+      {
+        role: 'user' as const,
+        content: '[The images you opened: "a.png", "b.png"]',
+        images: ['a', 'b'],
+      },
+      { role: 'user' as const, content: '[The images you opened: "gone.png"]', images: ['gone'] },
+    ],
+    images: new Map([
+      ['a', `data:image/png;base64,${png.toString('base64')}`],
+      ['b', 'data:image/jpeg;base64,/9j/'],
+    ]),
+  };
+  const images = conversationImages(request);
+  assert.deepEqual(
+    images.map(({ id, image }) => [id, image.mimeType]),
+    [
+      ['a', 'image/png'],
+      ['b', 'image/jpeg'],
+    ],
+  );
+  assert.ok(images[0]?.image.data.equals(png));
+  const text = conversationText(request, false);
+  assert.ok(
+    text.includes(
+      'User: [The images you opened: "a.png", "b.png"]\n\n[Attached to this request as images 1, 2',
+    ),
+  );
+  assert.ok(
+    text.endsWith(
+      '[Those images are no longer attached. Go by what was said about them above, or open them again with view_image.]',
+    ),
   );
 });
 

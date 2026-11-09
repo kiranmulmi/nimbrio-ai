@@ -1240,20 +1240,20 @@ test('read_attachment reads PDF pages, Word documents and text files', async () 
   const [pdf, docx, csv, png] = attachments.map((a) => a.id);
   const ctx = toolContext({ attachments: store });
 
-  const pages = String(await readAttachment.run({ id: pdf ?? '' }, ctx));
+  const pages = String(await readAttachment.run({ attachment_id: pdf ?? '' }, ctx));
   assert.match(pages, /pages 1-2 of 2/);
   assert.match(pages, /--- Page 1 ---\nQuarterly revenue grew 12 percent/);
   assert.match(pages, /--- Page 2 ---\nPage two mentions the Oslo office/);
-  const second = String(await readAttachment.run({ id: pdf ?? '', start_page: 2 }, ctx));
+  const second = String(await readAttachment.run({ attachment_id: pdf ?? '', start_page: 2 }, ctx));
   assert.doesNotMatch(second, /Quarterly/);
 
-  const doc = String(await readAttachment.run({ id: docx ?? '' }, ctx));
+  const doc = String(await readAttachment.run({ attachment_id: docx ?? '' }, ctx));
   assert.match(doc, /Meeting notes/);
   assert.match(doc, /Ship the beta on Friday\./);
 
-  assert.equal(await readAttachment.run({ id: csv ?? '' }, ctx), 'a,b\n1,2\n');
-  await assert.rejects(readAttachment.run({ id: png ?? '' }, ctx), /view_image/);
-  await assert.rejects(readAttachment.run({ id: 'nope' }, ctx), /no attachment with id/);
+  assert.equal(await readAttachment.run({ attachment_id: csv ?? '' }, ctx), 'a,b\n1,2\n');
+  await assert.rejects(readAttachment.run({ attachment_id: png ?? '' }, ctx), /view_image/);
+  await assert.rejects(readAttachment.run({ attachment_id: 'nope' }, ctx), /no attachment with id/);
 });
 
 test('save_attachment copies a file into the workspace and never overwrites', async () => {
@@ -1263,10 +1263,13 @@ test('save_attachment copies a file into the workspace and never overwrites', as
   const ctx = toolContext({ workspace: setup.filesDir, attachments: store });
 
   assert.equal(saveAttachment.needsApproval, true);
-  await saveAttachment.run({ id, path: 'public/logo.png' }, ctx);
+  await saveAttachment.run({ attachment_id: id, path: 'public/logo.png' }, ctx);
   assert.deepEqual(await fs.readFile(path.join(setup.filesDir, 'public', 'logo.png')), PNG);
-  await assert.rejects(saveAttachment.run({ id, path: 'public/logo.png' }, ctx), /already exists/);
-  await assert.rejects(saveAttachment.run({ id, path: '.nimbrio-ai/x.png' }, ctx));
+  await assert.rejects(
+    saveAttachment.run({ attachment_id: id, path: 'public/logo.png' }, ctx),
+    /already exists/,
+  );
+  await assert.rejects(saveAttachment.run({ attachment_id: id, path: '.nimbrio-ai/x.png' }, ctx));
 });
 
 test('attached files are listed for the model and view_image shows the image next', async () => {
@@ -1274,7 +1277,7 @@ test('attached files are listed for the model and view_image shows the image nex
   const { store, attachments } = attachmentStore([{ name: 'screen.png', bytes: PNG }]);
   const id = nth(attachments, 0).id;
   const { callModel, requests } = scriptedModel([
-    callTools(toolCall('t1', 'view_image', { id })),
+    callTools(toolCall('t1', 'view_image', { attachment_id: id })),
     answer('A single pixel.'),
   ]);
   const agent = createAgent({
@@ -1290,7 +1293,7 @@ test('attached files are listed for the model and view_image shows the image nex
 
   const first = nth(nth(requests, 0).messages, -1);
   assert.ok(first.role === 'user');
-  assert.match(first.content, /"screen\.png" \(image, 70 B\) id: 00000000-/);
+  assert.match(first.content, /"screen\.png" \(image, 70 B\) attachment_id: 00000000-/);
 
   // After the tool result: a user message that carries the image, and its data URL.
   const second = nth(requests, 1);
@@ -1314,7 +1317,10 @@ test('view_image refuses files that are not images', async () => {
   const { store, attachments } = attachmentStore([{ name: 'a.txt', bytes: Buffer.from('hi') }]);
   const shown: string[] = [];
   const ctx = toolContext({ attachments: store, showImage: (id) => shown.push(id) });
-  await assert.rejects(viewImage.run({ id: nth(attachments, 0).id }, ctx), /not an image/);
+  await assert.rejects(
+    viewImage.run({ attachment_id: nth(attachments, 0).id }, ctx),
+    /not an image/,
+  );
   assert.deepEqual(shown, []);
 });
 

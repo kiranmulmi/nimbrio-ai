@@ -3,7 +3,7 @@ import { defineTool } from './define.js';
 export const remember = defineTool<{ fact: string; replaces: string }>({
   name: 'remember',
   description:
-    "Save a lasting fact to long-term memory so it is available in future sessions. Call this when the user shares a preference, a fact about themselves or their work, or explicitly asks you to remember something. Never save one-off questions, what the user asked about, today's date, search results, or anything that only matters for the current conversation. Save one complete fact per topic: if a saved memory already covers the topic, pass its id in replaces and write the combined fact, instead of adding a near-copy.",
+    "Save a lasting fact to long-term memory so it is available in future sessions. Call this when the user shares a preference, a fact about themselves or their work, or explicitly asks you to remember something. Never save one-off questions, what the user asked about, what an attached file or image contains, today's date, search results, or anything that only matters for the current conversation. Save one complete fact per topic: if a saved memory already covers the topic, pass its id in replaces and write the combined fact, instead of adding a near-copy.",
   properties: {
     fact: {
       type: 'string',

@@ -35,20 +35,28 @@ export interface RunRequestInput {
   /** Extra model settings, e.g. `{ id: 'effort', value: 'high' }`. */
   parameters: { id: string; value: string }[];
   userText: string;
+  /** Images sent with the text, in the order the text numbers them. */
+  images?: readonly CursorImage[];
   tools: CursorTool[];
   conversationId?: string;
+}
+
+export interface CursorImage {
+  data: Buffer;
+  /** e.g. "image/png" */
+  mimeType: string;
 }
 
 // ---------- the run request ----------
 
 export function encodeRunRequest(input: RunRequestInput): Buffer {
   const conversationId = input.conversationId ?? randomUUID();
-  // UserMessage { text, message_id, selected_context (empty, but required), mode = 1 }:
-  // without the empty context and mode the server accepts the request and never answers.
+  // UserMessage { text, message_id, selected_context (required, even empty), mode = 1 }:
+  // without the context and mode the server accepts the request and never answers.
   const userMessage = messageField(1, [
     stringField(1, input.userText),
     stringField(2, randomUUID()),
-    messageField(3, []),
+    messageField(3, (input.images ?? []).map(selectedImage)),
     uintField(4, 1),
   ]);
   const action = messageField(2, [messageField(1, [userMessage])]);
@@ -79,6 +87,18 @@ export function encodeRunRequest(input: RunRequestInput): Buffer {
     stringField(16, conversationId), // conversation_group_id
   ]);
   return frame(runRequest);
+}
+
+/**
+ * SelectedContext.selected_images (1): SelectedImage { data (8, of the data_or_blob_id oneof),
+ * uuid (2), mime_type (7) }, as the Cursor CLI sends a pasted image (its ACP mode, 2026.11).
+ */
+function selectedImage(image: CursorImage): Buffer {
+  return messageField(1, [
+    bytesField(8, image.data),
+    stringField(2, randomUUID()),
+    stringField(7, image.mimeType),
+  ]);
 }
 
 /** McpToolDefinition { name, description, input_schema (Value), provider, tool_name }. */
