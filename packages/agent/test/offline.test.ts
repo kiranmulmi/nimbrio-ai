@@ -526,6 +526,7 @@ test(
       SUPABASE_URL: 'https://x.supabase.co',
       SUPABASE_ANON_KEY: 'anon',
       AUTH_ALLOWED_EMAILS: 'me@example.com',
+      SIGN_IN: 'off',
     });
     assert.equal(env.PATH, '/bin');
     assert.equal(env.HOME, '/h');
@@ -537,6 +538,7 @@ test(
       'SUPABASE_URL',
       'SUPABASE_ANON_KEY',
       'AUTH_ALLOWED_EMAILS',
+      'SIGN_IN',
     ])
       assert.equal(env[key], undefined, key);
   },

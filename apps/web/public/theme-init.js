@@ -14,4 +14,9 @@
         ? 'dark'
         : 'light';
   document.documentElement.setAttribute('data-theme', resolved);
+  // In the desktop app (its preload sets nimbrioDesktop) the window has no title bar: the top
+  // bars make room for the window buttons and move the window (index.css, data-desktop).
+  if (window.nimbrioDesktop && window.nimbrioDesktop.platform) {
+    document.documentElement.setAttribute('data-desktop', window.nimbrioDesktop.platform);
+  }
 })();

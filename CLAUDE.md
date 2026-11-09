@@ -16,6 +16,7 @@ npm workspaces (`apps/*`, `packages/*`). One lockfile at the root; always instal
 apps/api            @app/api       Express API: /v1 REST + SSE run stream; serves apps/web/dist when built
 apps/cli            @app/cli       terminal chat (same chats and workspaces as the web app)
 apps/web            @app/web       React + Vite + Tailwind chat UI
+apps/desktop        @app/desktop   Electron app: runs the built API in a utility process, shows the web app in a window
 packages/agent      @app/agent     the agent: loop, planner, prompts, guardrails, LLM client, tools, memory
 packages/db         @app/db        storage (files, no database): ~/.nimbrio-ai/ (workspace list, models with API keys, provider sign-ins, agent settings, MCP servers, mcp.json approvals) + each workspace's .nimbrio-ai/ files (chats, memory, settings, which MCP servers are on, attached files, skills), Store, runInChat
 packages/shared     @app/shared    contracts shared by api, web and agent (types, Zod schemas, envelopes)
@@ -44,11 +45,12 @@ Dependency direction: `shared` <- `agent` <- `db` <- `api`, `cli`; `web` depends
 - `npm run dev`: builds the packages once, then runs the API (:4000, `PORT`) and web app (:5173, `/v1` proxied) together via `concurrently` (Ctrl+C stops both); `npm run dev:api` / `npm run dev:web` still run one
 - `npm start`: build everything and serve API + web on http://localhost:4000
 - `npm run cli` / `npm run ask -- "prompt"`: terminal chat
+- `npm run desktop`: build and open the Electron app from the checkout; `npm run desktop:dist`: build the installer (`apps/desktop/release/`). Details: `apps/desktop/CLAUDE.md`
 - `npm test`: offline tests
 - `npm run eval`: behaviour evals against the real model (costs money)
 - `npm run build`, `npm run typecheck`, `npm run lint`, `npm run format`
 
 ## Where to find detailed rules
 
-- API -> `apps/api/CLAUDE.md`; web -> `apps/web/CLAUDE.md`; agent core -> `packages/agent/CLAUDE.md`
+- API -> `apps/api/CLAUDE.md`; web -> `apps/web/CLAUDE.md`; desktop -> `apps/desktop/CLAUDE.md`; agent core -> `packages/agent/CLAUDE.md`
 - Full standards -> @docs/standards.md

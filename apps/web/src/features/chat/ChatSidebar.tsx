@@ -129,7 +129,7 @@ export function ChatSidebar({
         } ${isCollapsed ? 'xl:invisible xl:opacity-0' : ''}`}
       >
         <SidebarResizer width={width.width} onResize={width.setWidth} onReset={width.reset} />
-        <div className="flex h-12 shrink-0 items-center gap-1 border-b border-line pl-4 pr-2">
+        <div className="titlebar flex h-12 shrink-0 items-center gap-1 border-b border-line pl-[calc(1rem+var(--titlebar-inset))] pr-2">
           <BrandLink />
           <IconButton onClick={onClose} aria-label="Hide chats" className="ml-auto xl:hidden">
             <ChevronRightIcon size={12} className="rotate-180" />

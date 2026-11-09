@@ -5,3 +5,5 @@ coverage
 package-lock.json
 *.tsbuildinfo
 runtime
+apps/desktop/.stage
+apps/desktop/release

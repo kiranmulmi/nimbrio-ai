@@ -22,7 +22,12 @@ export function ChatHeader({
   onShowSidebar?: () => void;
 }) {
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-4 sm:px-6">
+    <header
+      className={`titlebar flex h-12 shrink-0 items-center justify-between gap-3 border-b border-line px-4 sm:px-6 ${
+        // With the sidebar collapsed this bar is the window's top-left corner (wide screens).
+        onShowSidebar ? 'xl:pl-[calc(1.5rem+var(--titlebar-inset))]' : ''
+      }`}
+    >
       <div className="flex min-w-0 items-center gap-2.5">
         {onShowSidebar && (
           <IconButton

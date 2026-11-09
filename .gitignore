@@ -29,3 +29,7 @@ coverage/
 .claude/local/
 
 .nimbrio-ai
+
+# Desktop app build output
+apps/desktop/.stage/
+apps/desktop/release/

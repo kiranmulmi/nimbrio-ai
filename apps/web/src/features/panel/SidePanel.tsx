@@ -110,7 +110,7 @@ export function SidePanel({
         } ${isCollapsed ? 'lg:invisible lg:opacity-0' : ''}`}
       >
         <PanelResizer width={width.width} onResize={width.setWidth} onReset={width.reset} />
-        <div className="flex h-12 shrink-0 items-stretch gap-2 border-b border-line bg-subtle pl-2 pr-2 lg:min-w-[var(--panel-w)]">
+        <div className="titlebar flex h-12 shrink-0 items-stretch gap-2 border-b border-line bg-subtle pl-2 pr-2 lg:min-w-[var(--panel-w)]">
           <IconButton
             onClick={onHide}
             aria-controls="side-panel"

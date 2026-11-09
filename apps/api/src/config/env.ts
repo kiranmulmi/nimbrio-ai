@@ -16,6 +16,8 @@ const schema = z.object({
   SUPABASE_ANON_KEY: z.string().trim().default(''),
   /** Comma-separated emails that may sign in; empty lets any user of the project in. */
   AUTH_ALLOWED_EMAILS: z.string().default(''),
+  /** `off` keeps sign-in off even with the Supabase values set (the desktop app sets it). */
+  SIGN_IN: z.enum(['auto', 'off']).default('auto'),
 });
 
 export const env = schema.parse(process.env);
@@ -31,7 +33,7 @@ export interface AuthSettings {
 /** Read the sign-in settings; half of them set is a mistake worth stopping for. */
 export function readAuthSettings(values: typeof env): AuthSettings | null {
   const { SUPABASE_URL: url, SUPABASE_ANON_KEY: anonKey } = values;
-  if (!url && !anonKey) return null;
+  if (values.SIGN_IN === 'off' || (!url && !anonKey)) return null;
   if (!url || !anonKey) {
     throw new Error(
       'Set both SUPABASE_URL and SUPABASE_ANON_KEY in .env to turn on sign-in, or neither.',

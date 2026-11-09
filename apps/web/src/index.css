@@ -347,6 +347,25 @@
       0 1px 2px rgb(11 51 103 / 0.25);
   }
 
+  /* Desktop app on macOS (data-desktop, set by public/theme-init.js): no title bar, so the
+     window buttons sit in the top-left bar and the top bars (.titlebar) move the window.
+     --titlebar-inset is the room the buttons need; 0 in a browser and in full screen. */
+  :root {
+    --titlebar-inset: 0px;
+  }
+  :root[data-desktop='darwin']:not([data-fullscreen]) {
+    --titlebar-inset: 64px;
+  }
+  [data-desktop] .titlebar {
+    -webkit-app-region: drag;
+    user-select: none;
+  }
+  [data-desktop] .titlebar :is(button, a, input, select, textarea, [role='button'], [role='tab']),
+  [data-desktop] .titlebar [role='menu'],
+  [data-desktop] .titlebar [role='dialog'] {
+    -webkit-app-region: no-drag;
+  }
+
   /* The login screen's side panel: the brand tile's gradient, large. */
   .brand-panel {
     background:

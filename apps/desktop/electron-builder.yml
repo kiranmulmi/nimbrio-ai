@@ -1,0 +1,36 @@
+# Packs apps/desktop/.stage (laid out by scripts/stage.ts) into installers in release/.
+appId: ai.nimbrio.desktop
+productName: Nimbrio AI
+copyright: Copyright © 2026 Kiran Mulmi
+directories:
+  app: .stage
+  output: release
+electronVersion: 45.2.0
+# node-pty ships prebuilt Node-API binaries for macOS and Windows, which Electron loads as they are.
+npmRebuild: false
+# Native code and node-pty's spawn-helper must be real files on disk, not inside app.asar.
+asarUnpack:
+  - node_modules/node-pty/**
+artifactName: ${productName}-${version}-${os}-${arch}.${ext}
+
+mac:
+  target: dmg
+  category: public.app-category.developer-tools
+  icon: ../web/public/icons/icon-512.png
+  # Ad-hoc signed: Apple silicon won't open an app with no signature at all. Without a paid
+  # Developer ID, macOS asks the user to allow it once (System Settings → Privacy & Security).
+  identity: '-'
+  hardenedRuntime: false
+  extendInfo:
+    NSMicrophoneUsageDescription: Voice mode listens to what you say to the agent.
+
+dmg:
+  title: ${productName} ${version}
+
+win:
+  target: nsis
+  icon: ../web/public/icons/icon-512.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

@@ -26,6 +26,17 @@ npm run dev:web             # web app on http://localhost:5173, proxies /v1 to t
 
 Needs Node 22.9 or later. There is no database to install: everything is saved in files.
 
+### Desktop app
+
+The same app in its own window, for people who don't want Node or a terminal. It runs the API on this machine (on `127.0.0.1:47821`) and shows the web app in an Electron window; workspaces, chats and settings are the same files in `~/.nimbrio-ai/`, so the browser and the desktop app see the same data (use one at a time on the same chat). Sign-in is always off in the desktop app.
+
+```bash
+npm run desktop             # build everything and open the desktop app from this checkout
+npm run desktop:dist        # build the installer: apps/desktop/release/Nimbrio AI-<version>-mac-arm64.dmg
+```
+
+`desktop:dist` builds for the machine it runs on (a Mac builds the macOS `.dmg`; Windows builds an `.exe` installer). The app is ad-hoc signed, not signed with an Apple Developer ID, so the first time someone opens a downloaded copy macOS blocks it: they open it from System Settings → Privacy & Security → Open Anyway. The server's log is in `~/Library/Logs/Nimbrio AI/server.log`.
+
 ## Workspaces and storage
 
 Everything is per **workspace**: its chats, its memories, its folder and its own instructions for the agent (for example a "My app" workspace on `~/code/my-app` and a "Research" workspace on `~/notes/research`). Switch or create workspaces from the menu at the top of the sidebar; the gear opens the workspace's settings.
@@ -112,7 +123,8 @@ nimbrio-ai/
 │   ├── api/                Express API (@app/api): /v1 REST + a server-sent-events run stream
 │   │   └── src/            app.ts, index.ts, config/, middleware/, lib/, features/<feature>/
 │   ├── web/                React + Vite + Tailwind chat UI (@app/web)
-│   └── cli/                terminal chat (@app/cli): --once mode, --new/--path, /plan /memory /workspace /folder /reset
+│   ├── cli/                terminal chat (@app/cli): --once mode, --new/--path, /plan /memory /workspace /folder /reset
+│   └── desktop/            Electron desktop app (@app/desktop): runs the API and shows the web app in a window
 ├── packages/
 │   ├── agent/              the agent (@app/agent), no HTTP and no database
 │   │   ├── src/agent.ts    the agent loop: call model -> run tools -> repeat

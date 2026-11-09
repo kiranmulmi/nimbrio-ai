@@ -105,6 +105,17 @@ test('sign-in settings come from .env: both values or neither', () => {
   );
 });
 
+test('SIGN_IN=off keeps sign-in off even with the Supabase values set', () => {
+  const values = {
+    ...env,
+    SUPABASE_URL: 'https://abcd.supabase.co',
+    SUPABASE_ANON_KEY: 'k',
+    AUTH_ALLOWED_EMAILS: '',
+  };
+  assert.equal(readAuthSettings({ ...values, SIGN_IN: 'off' }), null);
+  assert.notEqual(readAuthSettings({ ...values, SIGN_IN: 'auto' }), null);
+});
+
 test('only JWT-shaped tokens are sent to Supabase to check', () => {
   const part = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');
   assert.ok(isJwtShaped(`${part({ alg: 'ES256' })}.${part({ sub: 'u' })}.c2ln`));

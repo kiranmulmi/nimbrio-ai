@@ -38,7 +38,7 @@ export function AppNav({
 }) {
   return (
     <header
-      className={`relative z-20 flex h-14 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 sm:px-5 ${
+      className={`titlebar relative z-20 flex h-14 shrink-0 items-center gap-2 border-b border-line bg-surface px-3 pl-[calc(0.75rem+var(--titlebar-inset))] sm:px-5 sm:pl-[calc(1.25rem+var(--titlebar-inset))] ${
         hasSidebar ? 'xl:hidden' : ''
       }`}
     >

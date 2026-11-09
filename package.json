@@ -20,6 +20,8 @@
     "dev:web": "npm run build -w @app/shared && npm run dev -w @app/web",
     "cli": "npm run build:packages && npm run start -w @app/cli --",
     "ask": "npm run build:packages && npm run start -w @app/cli -- --once",
+    "desktop": "npm run build && npm run start -w @app/desktop",
+    "desktop:dist": "npm run build && npm run dist -w @app/desktop",
     "test": "npm run build:packages && npm run test --workspaces --if-present",
     "eval": "npm run build -w @app/shared && npm run eval -w @app/agent",
     "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present",

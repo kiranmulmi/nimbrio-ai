@@ -1,0 +1,26 @@
+{
+  "name": "@app/desktop",
+  "productName": "Nimbrio AI",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Nimbrio AI as a desktop app: the API and web app in an Electron window",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && electron .",
+    "stage": "tsx scripts/stage.ts",
+    "dist": "npm run build && npm run stage && electron-builder --config electron-builder.yml",
+    "lint": "eslint \"src/**/*.{ts,cts}\" \"scripts/**/*.ts\" \"test/**/*.ts\" --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "tsx --test \"test/**/*.test.ts\"",
+    "clean": "rm -rf dist .stage release"
+  },
+  "devDependencies": {
+    "@app/eslint-config": "*",
+    "@app/tsconfig": "*",
+    "@types/node": "^22.10.0",
+    "electron": "45.2.0",
+    "electron-builder": "26.18.0"
+  }
+}
