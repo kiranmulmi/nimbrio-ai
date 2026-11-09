@@ -185,6 +185,30 @@ function summarizeHistory(
     .join('\n');
 }
 
+/** Where models put a step's text when they send steps as objects instead of strings. */
+const STEP_TEXT_KEYS = [
+  'text',
+  'description',
+  'step',
+  'title',
+  'task',
+  'action',
+  'content',
+  'name',
+];
+
+/**
+ * One planned step as text. Some models send `{ "step": 1, "description": "…" }` instead of a
+ * string; its text is used (never "[object Object]"), and a step with no text is dropped.
+ */
+function stepText(step: unknown): string {
+  if (typeof step === 'string') return step.trim();
+  if (!isRecord(step)) return '';
+  const values = [...STEP_TEXT_KEYS.map((key) => step[key]), ...Object.values(step)];
+  const text = values.find((value) => typeof value === 'string' && value.trim());
+  return typeof text === 'string' ? text.trim() : '';
+}
+
 /** Read the planner's JSON reply. Anything unusable means "answer directly". */
 export function parseDecision(text: string): PlanDecision {
   const start = text.indexOf('{');
@@ -202,7 +226,7 @@ export function parseDecision(text: string): PlanDecision {
     };
   }
   const reply = isRecord(parsed) ? parsed : {};
-  const steps = Array.isArray(reply.steps) ? reply.steps.map(String).filter((s) => s.trim()) : [];
+  const steps = Array.isArray(reply.steps) ? reply.steps.map(stepText).filter(Boolean) : [];
   if (reply.mode === 'plan' && steps.length > 0 && String(reply.goal ?? '').trim()) {
     return {
       mode: 'plan',

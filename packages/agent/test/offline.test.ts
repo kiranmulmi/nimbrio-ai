@@ -953,6 +953,26 @@ test('planner replies are parsed defensively', () => {
   );
 });
 
+test('planner steps sent as objects keep their text, never "[object Object]"', () => {
+  const decision = parseDecision(
+    JSON.stringify({
+      mode: 'plan',
+      goal: 'Commit the changes',
+      steps: [
+        { step: 1, description: 'Check git status' },
+        { title: 'Review the diff' },
+        'Commit',
+        { id: 4, done: false },
+        42,
+      ],
+    }),
+  );
+  assert.equal(decision.mode, 'plan');
+  if (decision.mode === 'plan') {
+    assert.deepEqual(decision.steps, ['Check git status', 'Review the diff', 'Commit']);
+  }
+});
+
 test('fetch_page only opens public addresses', async () => {
   for (const ip of [
     '127.0.0.1',
