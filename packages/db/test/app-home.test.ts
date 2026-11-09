@@ -252,3 +252,34 @@ test('the old .agentic-ai folders move to the new name, never over newer files',
   // Nothing left to move the second time.
   assert.deepEqual(await moveLegacyFolders(appHome, [moved]), []);
 });
+
+test('models: a Cursor model keeps no server or key and runs with the Cursor sign-in token', async () => {
+  const dir = await home();
+  let token: string | null = 'cursor-token';
+  const models = new ModelStore(appHomeFile(dir, 'models'), () => Promise.resolve(token));
+  const cursor = await models.create({
+    name: 'Claude Opus 5.5',
+    model: 'claude-opus-5-5',
+    provider: 'cursor',
+    baseUrl: 'https://ignored.example.com/v1',
+    apiKey: 'ignored',
+    contextWindow: 300_000,
+  });
+  assert.equal(cursor.provider, 'cursor');
+  assert.equal(cursor.baseUrl, null);
+  assert.equal(cursor.hasApiKey, false);
+  const resolved = await models.settingsFor(cursor.id);
+  assert.equal(resolved?.settings.provider, 'cursor');
+  assert.equal(resolved?.settings.apiKey, 'cursor-token');
+
+  // Editing without a provider keeps it a Cursor model.
+  const edited = await models.update(cursor.id, { name: 'Opus', model: 'claude-opus-5-5' });
+  assert.equal(edited?.provider, 'cursor');
+  token = null;
+  assert.equal((await models.settingsFor(cursor.id))?.settings.apiKey, '');
+
+  // Older files without a provider read as OpenAI-compatible models.
+  const plain = await models.create({ name: 'GPT', model: 'gpt-4.1', apiKey: 'sk-1' });
+  assert.equal(plain.provider, 'openai');
+  assert.equal((await models.settingsFor(plain.id))?.settings.apiKey, 'sk-1');
+});

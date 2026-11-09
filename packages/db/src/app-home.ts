@@ -7,6 +7,7 @@
 //     agent-settings.json    how the agent behaves: Settings -> Agent (SettingsStore)
 //     mcp-servers.json       the MCP servers, in the { mcpServers } shape (McpServerStore)
 //     mcp-trust.json         which workspace mcp.json files the user approved (McpTrust)
+//     providers.json         sign-ins with model providers, with their tokens (ProviderStore)
 //
 // Files holding secrets are written 0600 (writePrivateJson). Workspaces can't be the home
 // folder (prepareWorkspaceFolder), so the file tools never reach these.
@@ -22,6 +23,7 @@ export const APP_HOME_FILES = {
   agentSettings: 'agent-settings.json',
   mcpServers: 'mcp-servers.json',
   mcpTrust: 'mcp-trust.json',
+  providers: 'providers.json',
 } as const;
 
 export type AppHomeFile = keyof typeof APP_HOME_FILES;

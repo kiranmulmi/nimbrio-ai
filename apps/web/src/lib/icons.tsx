@@ -366,6 +366,14 @@ export function ServerIcon({ size = 14, ...rest }: IconProps) {
   );
 }
 
+export function PlugIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M6 1.75v3M10 1.75v3M4 4.75h8v2.5a4 4 0 0 1-8 0v-2.5zM8 11.25v3" />
+    </svg>
+  );
+}
+
 export function ShieldIcon({ size = 14, ...rest }: IconProps) {
   return (
     <svg {...base(size)} {...rest}>

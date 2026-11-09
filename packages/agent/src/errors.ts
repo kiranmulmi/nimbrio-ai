@@ -16,3 +16,11 @@ export function errorCode(error: unknown): string | undefined {
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
+
+/** The run was stopped by the user while this call was in flight. */
+export class StoppedError extends Error {
+  constructor() {
+    super('Stopped by the user.');
+    this.name = 'StoppedError';
+  }
+}

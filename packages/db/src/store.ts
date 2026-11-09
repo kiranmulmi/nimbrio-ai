@@ -1,8 +1,8 @@
 // All storage, so the rest of the app never touches the data files. There is no database:
 // the app's own data (the list of workspaces, models, agent settings, MCP servers, mcp.json
-// approvals) lives in ~/.nimbrio-ai/ (app-home.ts). Everything about one workspace
-// (including which MCP servers are on), chats, messages, runs, memory and its instructions,
-// lives in the workspace folder under .nimbrio-ai/ (workspace-data.ts).
+// approvals, provider sign-ins) lives in ~/.nimbrio-ai/ (app-home.ts). Everything about one
+// workspace (including which MCP servers are on), chats, messages, runs, memory and its
+// instructions, lives in the workspace folder under .nimbrio-ai/ (workspace-data.ts).
 import fs from 'node:fs/promises';
 import nodePath from 'node:path';
 import {
@@ -29,6 +29,7 @@ import { WorkspaceSkills } from './workspace-skills.js';
 import { McpServerStore } from './mcp-servers.js';
 import { McpTrust } from './mcp-trust.js';
 import { ModelStore } from './models.js';
+import { ProviderStore } from './providers.js';
 import { SettingsStore } from './settings.js';
 import { WorkspaceMcp } from './workspace-mcp.js';
 import { WorkspaceList, type SavedWorkspace } from './workspaces.js';
@@ -56,13 +57,18 @@ export class Store {
   readonly settings: SettingsStore;
   /** MCP servers, set up once for every workspace (each turns them on in `mcp(workspace)`). */
   readonly mcpServers: McpServerStore;
+  /** Sign-ins with model providers (Cursor), app-wide. */
+  readonly providers: ProviderStore;
 
   /** `appHome`: the folder for the app's own settings files (default ~/.nimbrio-ai). */
   constructor({ appHome = DEFAULT_APP_HOME }: { appHome?: string } = {}) {
     this.#appHome = appHome;
     this.#workspaces = new WorkspaceList(appHomeFile(appHome, 'workspaces'));
     this.#mcpTrust = new McpTrust(appHomeFile(appHome, 'mcpTrust'));
-    this.models = new ModelStore(appHomeFile(appHome, 'models'));
+    this.providers = new ProviderStore(appHomeFile(appHome, 'providers'));
+    this.models = new ModelStore(appHomeFile(appHome, 'models'), () =>
+      this.providers.cursorAccessToken(),
+    );
     this.settings = new SettingsStore(appHomeFile(appHome, 'agentSettings'));
     this.mcpServers = new McpServerStore(appHomeFile(appHome, 'mcpServers'));
   }

@@ -1,7 +1,8 @@
 // The one place that talks to the model. It uses the OpenAI Chat Completions
 // API, which OpenAI and many other servers speak (Ollama, OpenRouter, Groq,
 // LM Studio, vLLM, Together, DeepSeek, ...). Models are set up in the app's
-// Settings -> Models and passed in per run as ModelSettings.
+// Settings -> Models and passed in per run as ModelSettings. Cursor's models, which speak
+// Cursor's own protocol instead, are called by cursor/caller.ts; createModelCaller picks.
 import OpenAI from 'openai';
 import type {
   ChatCompletionContentPart,
@@ -10,14 +11,17 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { ReasoningEffort } from 'openai/resources/shared';
 import type { Usage } from '@app/shared';
-import { isRecord } from './errors.js';
+import { StoppedError, isRecord } from './errors.js';
 import type { ModelMessage, ToolCall } from './memory/short-term.js';
 import type { ToolDefinition } from './tools/define.js';
+import { createCursorModelCaller } from './cursor/caller.js';
 
 /** Which model one run talks to, and how. */
 export interface ModelSettings {
   /** What the app calls the model, used in error messages. */
   label: string;
+  /** Who serves it: any OpenAI-compatible server, or Cursor (signed in; `apiKey` is its token). */
+  provider?: 'openai' | 'cursor';
   /** Any OpenAI-compatible server. Undefined means api.openai.com. */
   baseURL?: string;
   apiKey: string;
@@ -65,6 +69,7 @@ export interface ModelResponse {
 export type CallModel = (req: ModelRequest) => Promise<ModelResponse>;
 
 export function createModelCaller(config: ModelSettings): CallModel {
+  if (config.provider === 'cursor') return createCursorModelCaller(config);
   let client: OpenAI | undefined;
   function getClient(): OpenAI {
     // Local servers (Ollama, LM Studio) don't check the key, but the SDK needs a value.
@@ -198,14 +203,6 @@ function toApiMessage(
     ...urls.map((url): ChatCompletionContentPart => ({ type: 'image_url', image_url: { url } })),
   ];
   return { role: 'user', content: parts };
-}
-
-/** The run was stopped by the user while this call was in flight. */
-export class StoppedError extends Error {
-  constructor() {
-    super('Stopped by the user.');
-    this.name = 'StoppedError';
-  }
 }
 
 function describeApiError(error: unknown, config: ModelSettings, hasImages: boolean): unknown {

@@ -23,6 +23,8 @@ import { createFoldersService } from './features/folders/folders.service.js';
 import { infoRouter } from './features/info/info.routes.js';
 import { mcpRouter } from './features/mcp/mcp.routes.js';
 import { promptsRouter } from './features/prompts/prompts.routes.js';
+import { providersRouter } from './features/providers/providers.routes.js';
+import { createProvidersService } from './features/providers/providers.service.js';
 import { tasksRouter } from './features/tasks/tasks.routes.js';
 import { createTasksService } from './features/tasks/tasks.service.js';
 import { terminalRouter } from './features/terminal/terminal.routes.js';
@@ -88,6 +90,7 @@ export function createApp(context: AppContext) {
   v1.use(infoRouter(context));
   v1.use(settingsRouter(context.settings));
   v1.use(modelsRouter(models));
+  v1.use(providersRouter(createProvidersService(context)));
   v1.use(promptsRouter(context, models));
   v1.use(workspacesRouter(workspaces));
   v1.use(chatsRouter(chats));

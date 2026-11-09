@@ -403,7 +403,11 @@ export function VoiceBar(props: {
 
           {/* Call controls: the turn's action, then End call, always last and always red. */}
           {isInCall ? (
-            <div role="group" aria-label="Call controls" className="flex shrink-0 items-start gap-3">
+            <div
+              role="group"
+              aria-label="Call controls"
+              className="flex shrink-0 items-start gap-3"
+            >
               {phase === 'listening' ? (
                 <CallButton
                   label="Send"

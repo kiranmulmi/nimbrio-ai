@@ -67,7 +67,7 @@ export function ModelControls({
         </>
       }
       icon={<SparkIcon size={12} className="shrink-0 text-accent" />}
-      title={`${model.model} at ${serverLabel(model.baseUrl)}${
+      title={`${model.model} at ${serverLabel(model)}${
         model.supportsReasoning ? ` · reasoning effort: ${effortLabel}` : ''
       }`}
       menuLabel="Model"

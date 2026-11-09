@@ -137,12 +137,12 @@ export function ModelsPage() {
                   <span className="truncate text-[14px] font-medium text-ink">{model.name}</span>
                   {model.isDefault && <Badge tone="blue">default</Badge>}
                   {model.supportsReasoning && <Badge>reasoning effort</Badge>}
-                  {!model.hasApiKey && model.baseUrl === null && (
+                  {model.provider === 'openai' && !model.hasApiKey && model.baseUrl === null && (
                     <Badge tone="yellow">no API key</Badge>
                   )}
                 </div>
                 <p className="mt-0.5 truncate font-mono text-[12px] text-ink-3">
-                  {model.model} · {serverLabel(model.baseUrl)}
+                  {model.model} · {serverLabel(model)}
                 </p>
               </div>
               {pendingDefault === model.id && <Spinner size={13} label="Making it the default" />}

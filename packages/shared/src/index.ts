@@ -65,14 +65,23 @@ export {
 
 export {
   DEFAULT_CONTEXT_WINDOW,
+  MODEL_PROVIDERS,
   REASONING_EFFORTS,
   modelInputSchema,
   modelUpdateSchema,
   type ModelInput,
   type ModelProfile,
+  type ModelProvider,
   type ModelUpdate,
   type ReasoningEffort,
 } from './model.js';
+
+export {
+  type ProviderAccount,
+  type ProviderLogin,
+  type ProviderLoginStatus,
+  type ProviderModel,
+} from './provider.js';
 
 export {
   TOOL_GROUPS,

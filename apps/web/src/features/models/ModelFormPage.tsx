@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { DEFAULT_CONTEXT_WINDOW, LIMITS, modelInputSchema, modelUpdateSchema } from '@app/shared';
+import {
+  DEFAULT_CONTEXT_WINDOW,
+  LIMITS,
+  modelInputSchema,
+  modelUpdateSchema,
+  type ModelProvider,
+} from '@app/shared';
 import { Button } from '../../components/Button';
 import { ConfirmDeleteDialog } from '../../components/ConfirmDeleteDialog';
 import { ERROR, INPUT_ERROR, INPUT_OK } from '../../components/form';
@@ -59,6 +65,9 @@ export function ModelFormPage() {
 
   const [name, setName] = useState('');
   const [model, setModel] = useState('');
+  // Cursor models are added from Settings → Model providers; here they only change their details.
+  const [provider, setProvider] = useState<ModelProvider>('openai');
+  const isCursor = provider === 'cursor';
   const [baseUrl, setBaseUrl] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [hasSavedKey, setHasSavedKey] = useState(false);
@@ -94,6 +103,7 @@ export function ModelFormPage() {
         if (!isCurrent) return;
         setName(saved.name);
         setModel(saved.model);
+        setProvider(saved.provider);
         setBaseUrl(saved.baseUrl ?? '');
         setHasSavedKey(saved.hasApiKey);
         setMaxTokens(saved.maxTokens === null ? '' : String(saved.maxTokens));
@@ -188,7 +198,12 @@ export function ModelFormPage() {
         onSubmit={(event) => void submit(event)}
         className="panel flex flex-col gap-4 px-5 py-4 sm:px-6"
       >
-        <div>
+        {isCursor && (
+          <p className="border-l-[3px] border-accent bg-accent-bg px-4 py-2.5 text-[13px] text-ink-2">
+            Served by Cursor with the account signed in under Settings → Model providers.
+          </p>
+        )}
+        <div hidden={isCursor}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label htmlFor="model-url" className={LABEL}>
               Server
@@ -267,7 +282,9 @@ export function ModelFormPage() {
                 {errors.model}
               </p>
             ) : (
-              <p className={TIP}>Exactly as the server lists it.</p>
+              <p className={TIP}>
+                {isCursor ? 'Cursor’s id for the model.' : 'Exactly as the server lists it.'}
+              </p>
             )}
           </div>
           <div className="min-w-0">
@@ -297,7 +314,7 @@ export function ModelFormPage() {
           </div>
         </div>
 
-        <div>
+        <div hidden={isCursor}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label htmlFor="model-key" className={LABEL}>
               API key <span className={OPTIONAL}>· not needed for Ollama or LM Studio</span>

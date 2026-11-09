@@ -6,7 +6,10 @@ const SIDEBAR_MIN = 200;
 const WIDTH_KEY = 'agent.sidebarWidth';
 
 const clamp = (px: number, viewport: number) =>
-  Math.min(Math.max(SIDEBAR_MIN, Math.round(viewport * 0.4)), Math.max(SIDEBAR_MIN, Math.round(px)));
+  Math.min(
+    Math.max(SIDEBAR_MIN, Math.round(viewport * 0.4)),
+    Math.max(SIDEBAR_MIN, Math.round(px)),
+  );
 
 /** The chats sidebar's width on wide screens: dragged or reset, and remembered. */
 export function useSidebarWidth() {

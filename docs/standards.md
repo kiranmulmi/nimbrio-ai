@@ -35,7 +35,7 @@ Standards for this repo: an AI agent with a Node/Express/TypeScript API, a React
 
 ## Agent core (`@app/agent`)
 
-- `llm.ts` is the only file that calls the model. Everything else takes a `CallModel`, so tests can pass a fake.
+- `llm.ts` is the only file that calls the model (it hands Cursor's models to `cursor/caller.ts`). Everything else takes a `CallModel`, so tests can pass a fake.
 - Config is read from env only by `loadAgentConfig`, called by the apps. Library code never reads `process.env` at import time.
 - One file per tool in `src/tools/`, built with `defineTool`. The description says _when_ to use the tool. Arguments are validated in code. Tools that change anything outside the agent set `needsApproval: true`.
 - Every new tool or behaviour gets an offline test (fake model) and, where model behaviour matters, an eval case.
@@ -65,7 +65,7 @@ Standards for this repo: an AI agent with a Node/Express/TypeScript API, a React
 
 ## Storage
 
-- There is no database. The app's global data (the workspace list, models, agent settings, MCP servers, mcp.json approvals) is JSON files in the user's `~/.nimbrio-ai/` (`app-home.ts` in `@app/db`); each workspace's data is in its own `.nimbrio-ai/`. Only `@app/db` reads or writes them.
+- There is no database. The app's global data (the workspace list, models, agent settings, MCP servers, mcp.json approvals, provider sign-ins) is JSON files in the user's `~/.nimbrio-ai/` (`app-home.ts` in `@app/db`); each workspace's data is in its own `.nimbrio-ai/`. Only `@app/db` reads or writes them.
 - Writes are atomic (`writeFileAtomic`) and each read-change-write of a file runs in its own queue (`serialized`). Files that can hold secrets are written `0600` (`writePrivateJson`).
 - Read files leniently where a default is safe, but a damaged file holding user data is an error naming the file, never silently replaced. `uuid` ids for exposed entities.
 
@@ -74,6 +74,7 @@ Standards for this repo: an AI agent with a Node/Express/TypeScript API, a React
 - Never commit secrets or `.env`. Secrets come from env via one config module per app, except model API keys: those are entered in the app, stored by `@app/db` in `~/.nimbrio-ai/models.json` (written `0600`), and never returned by the API (only `hasApiKey`).
 - The API listens on 127.0.0.1 only, rejects foreign `Host` headers and non-JSON writes. Keep all three.
 - File tools are sandboxed to the workspace's chosen folder (`resolveInWorkspace`, judged by the real path after symlinks); they never change the folder itself or `.git/` (`assertCanChange`), never reach the app's own `.nimbrio-ai/` data (`isInAppData`), and a workspace can't be the disk root or the home folder (`prepareWorkspaceFolder`). `run_command` always needs approval, runs in the workspace without this app's env secrets (`commandEnv`), and refuses catastrophic commands even in auto mode (`refuseCommand`); with `background: true` it keeps running as a task the user sees and can stop in the Tasks tab (where the user can also start one: no approval, as it's their own, but the same `refuseCommand`, workspace folder and env), a chat only reaches its own workspace's tasks, and the app stops them all when it exits. Page fetches refuse private addresses (`assertPublicUrl`).
+- Provider sign-ins (Cursor) are saved by `@app/db` in `~/.nimbrio-ai/providers.json` (written `0600`) and never returned by the API (only who is signed in). The PKCE verifier of a sign-in in progress stays in the API's memory; the browser gets only the provider's login URL. A Cursor model's run gets the token from `store.providers` (renewed when it ran out), sends it only to `api2.cursor.sh` and the `*.api5.cursor.sh` chat host Cursor names, and declines Cursor's own tools, so everything the model does goes through this app's tools and approvals.
 - Attached files are kept in the workspace's `.nimbrio-ai/uploads/` (ids are UUIDs, names stripped of folders), read by the agent only through the attachment tools; copying one into the workspace (`save_attachment`) needs approval. The API serves them back inline only for images and PDFs, as downloads otherwise.
 - Skills are the user's own prompt text in the workspace's `.nimbrio-ai/skills/<name>.md`: written only from the app (the file tools can't reach `.nimbrio-ai/`), read through `SkillStore`, named in kebab-case so a name is never a path, read without following links. Loading one (`use_skill`) changes nothing, so it needs no approval, and a skill can't turn approvals off.
 - The integrated terminal (`/v1/terminal/socket`) is a shell for the user, not the agent: it runs without approvals, so the socket accepts only this app's Origin and Host and a one-time ticket from a JSON request. Keep all three.

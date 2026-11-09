@@ -4,6 +4,7 @@ import { McpServerFormPage } from './features/mcp/McpServerFormPage';
 import { McpServersPage } from './features/mcp/McpServersPage';
 import { ModelFormPage } from './features/models/ModelFormPage';
 import { ModelsPage } from './features/models/ModelsPage';
+import { ProvidersPage } from './features/providers/ProvidersPage';
 import { AgentSettingsPage } from './features/settings/AgentSettingsPage';
 import { RootRedirect } from './features/workspaces/RootRedirect';
 import { WorkspaceFormPage } from './features/workspaces/WorkspaceFormPage';
@@ -12,10 +13,11 @@ import { SettingsModal, useSettingsBackground } from './layout/SettingsModal';
 import { ThemeProvider } from './lib/theme';
 import { ToastProvider } from './lib/toast';
 
-/** Models, Agent and MCP servers: full pages, or a popup over the chat (SettingsModal). */
+/** Models, Model providers, Agent and MCP servers: full pages, or a popup over the chat (SettingsModal). */
 const settingsRoutes = (
   <>
     <Route path="/settings/models" element={<ModelsPage />} />
+    <Route path="/settings/providers" element={<ProvidersPage />} />
     <Route path="/settings/agent" element={<AgentSettingsPage />} />
     <Route path="/settings/models/new" element={<ModelFormPage />} />
     <Route path="/settings/models/:modelId/edit" element={<ModelFormPage />} />

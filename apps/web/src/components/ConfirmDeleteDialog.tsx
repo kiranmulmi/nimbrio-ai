@@ -9,6 +9,7 @@ export function ConfirmDeleteDialog({
   title,
   message,
   confirmLabel = 'Delete',
+  busyLabel = 'Deleting…',
   busy = false,
   onCancel,
   onConfirm,
@@ -17,6 +18,7 @@ export function ConfirmDeleteDialog({
   title: string;
   message: ReactNode;
   confirmLabel?: string;
+  busyLabel?: string;
   busy?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
@@ -62,7 +64,7 @@ export function ConfirmDeleteDialog({
           </Button>
           <Button variant="danger" onClick={onConfirm} disabled={busy} autoFocus={open}>
             {busy && <Spinner size={13} />}
-            {busy ? 'Deleting…' : confirmLabel}
+            {busy ? busyLabel : confirmLabel}
           </Button>
         </div>
       </div>

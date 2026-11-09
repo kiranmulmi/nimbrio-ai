@@ -1,9 +1,11 @@
 // The models the agent can run on, app-wide, in ~/.nimbrio-ai/models.json (written 0600).
 // API keys are kept there and only ever leave through `settingsFor`, for a run on this
-// machine; the UI sees `hasApiKey`.
+// machine; the UI sees `hasApiKey`. A Cursor model keeps no key: `settingsFor` gives it the
+// token of the Cursor sign-in (Settings → Model providers).
 import { randomUUID } from 'node:crypto';
 import { serialized, type ModelSettings } from '@app/agent';
 import {
+  MODEL_PROVIDERS,
   modelInputSchema,
   modelUpdateSchema,
   type ModelInput,
@@ -20,6 +22,7 @@ const savedModelSchema = z.object({
   id: z.string().refine(isUuid, 'must be a UUID'),
   name: z.string().min(1),
   model: z.string().min(1),
+  provider: z.enum(MODEL_PROVIDERS).default('openai'),
   baseUrl: z.string().nullable().default(null),
   apiKey: z.string().nullable().default(null),
   maxTokens: z.number().int().positive().nullable().default(null),
@@ -41,8 +44,14 @@ export interface ResolvedModel {
   settings: ModelSettings;
 }
 
+/** The current Cursor access token (renewed when it ran out), or null when not signed in. */
+export type CursorTokenSource = () => Promise<string | null>;
+
 export class ModelStore {
-  constructor(readonly file: string) {}
+  constructor(
+    readonly file: string,
+    private readonly cursorToken: CursorTokenSource = () => Promise.resolve(null),
+  ) {}
 
   /** Oldest first, so the list stays put as models are added. */
   async list(): Promise<ModelProfile[]> {
@@ -63,8 +72,7 @@ export class ModelStore {
         id: randomUUID(),
         name: clean.name,
         model: clean.model,
-        baseUrl: clean.baseUrl,
-        apiKey: clean.apiKey || null,
+        ...connection(clean.provider, clean.baseUrl, clean.apiKey || null),
         maxTokens: clean.maxTokens,
         contextWindow: clean.contextWindow,
         supportsReasoning: clean.supportsReasoning,
@@ -90,8 +98,11 @@ export class ModelStore {
         ...current,
         name: clean.name,
         model: clean.model,
-        baseUrl: clean.baseUrl,
-        apiKey: clean.apiKey === undefined ? current.apiKey : clean.apiKey || null,
+        ...connection(
+          clean.provider ?? current.provider,
+          clean.baseUrl,
+          clean.apiKey === undefined ? current.apiKey : clean.apiKey || null,
+        ),
         maxTokens: clean.maxTokens,
         contextWindow: clean.contextWindow,
         supportsReasoning: clean.supportsReasoning,
@@ -145,13 +156,15 @@ export class ModelStore {
     const saved =
       id === undefined ? models.find((m) => m.isDefault) : models.find((m) => m.id === id);
     if (!saved) return null;
+    const apiKey = saved.provider === 'cursor' ? await this.cursorToken() : saved.apiKey;
     return {
       profile: toProfile(saved),
       settings: {
         label: saved.name,
+        provider: saved.provider,
         model: saved.model,
         baseURL: saved.baseUrl ?? undefined,
-        apiKey: saved.apiKey ?? '',
+        apiKey: apiKey ?? '',
         maxTokens: saved.maxTokens,
         contextWindow: saved.contextWindow,
         reasoningEffort: null,
@@ -197,6 +210,14 @@ function check<S extends z.ZodTypeAny>(schema: S, value: unknown): z.output<S> {
   return result.data;
 }
 
+/** A Cursor model has no server or key of its own: it goes through the Cursor sign-in. */
+const connection = (
+  provider: SavedModel['provider'],
+  baseUrl: string | null,
+  apiKey: string | null,
+): Pick<SavedModel, 'provider' | 'baseUrl' | 'apiKey'> =>
+  provider === 'cursor' ? { provider, baseUrl: null, apiKey: null } : { provider, baseUrl, apiKey };
+
 const notDefault = (model: SavedModel): SavedModel =>
   model.isDefault ? { ...model, isDefault: false } : model;
 
@@ -205,6 +226,7 @@ function toProfile(saved: SavedModel): ModelProfile {
     id: saved.id,
     name: saved.name,
     model: saved.model,
+    provider: saved.provider,
     baseUrl: saved.baseUrl,
     hasApiKey: Boolean(saved.apiKey),
     maxTokens: saved.maxTokens,

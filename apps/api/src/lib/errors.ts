@@ -38,6 +38,13 @@ export class PayloadTooLargeError extends HttpError {
   }
 }
 
+/** A service this app calls (a model provider's sign-in, say) failed or answered badly. */
+export class UpstreamError extends HttpError {
+  constructor(message = 'An outside service failed.') {
+    super(502, 'UPSTREAM_ERROR', message);
+  }
+}
+
 export class UnsupportedMediaTypeError extends HttpError {
   constructor(message = 'Send JSON.') {
     super(415, 'UNSUPPORTED_MEDIA_TYPE', message);

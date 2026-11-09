@@ -1,10 +1,11 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { GearIcon, ServerIcon, SparkIcon } from '../../lib/icons';
+import { GearIcon, PlugIcon, ServerIcon, SparkIcon } from '../../lib/icons';
 import { fromPath } from '../../lib/routerState';
 
 const TABS = [
   { to: '/settings/models', label: 'Models', icon: <SparkIcon size={13} /> },
+  { to: '/settings/providers', label: 'Model providers', icon: <PlugIcon size={13} /> },
   { to: '/settings/mcp', label: 'MCP servers', icon: <ServerIcon size={13} /> },
   { to: '/settings/agent', label: 'Agent settings', icon: <GearIcon size={13} /> },
 ] as const;

@@ -13,6 +13,14 @@ export const REASONING_EFFORTS = ['low', 'medium', 'high'] as const;
 export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
 /**
+ * Who serves a model: `openai` is any server that speaks the OpenAI API (with a base URL and
+ * key); `cursor` is Cursor, through the account signed in under Settings → Model providers.
+ */
+export const MODEL_PROVIDERS = ['openai', 'cursor'] as const;
+
+export type ModelProvider = (typeof MODEL_PROVIDERS)[number];
+
+/**
  * A model the agent can run on, set up once for the whole app (not per workspace).
  * The API key never leaves the server: the UI only learns whether one is saved.
  */
@@ -22,7 +30,8 @@ export interface ModelProfile {
   name: string;
   /** The model name exactly as the server lists it, e.g. "gpt-4.1". */
   model: string;
-  /** Any OpenAI-compatible server. Null means api.openai.com. */
+  provider: ModelProvider;
+  /** Any OpenAI-compatible server. Null means api.openai.com (and always for Cursor). */
   baseUrl: string | null;
   hasApiKey: boolean;
   /** Null lets the server decide. */
@@ -90,6 +99,7 @@ const contextWindow = z
 export const modelInputSchema = z.object({
   name,
   model: modelId,
+  provider: z.enum(MODEL_PROVIDERS).default('openai'),
   baseUrl: baseUrl.default(null),
   /** Empty or left out: no key (local servers like Ollama don't need one). */
   apiKey: apiKey.default(''),
@@ -99,9 +109,13 @@ export const modelInputSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
-/** Like the input, but a left-out `apiKey` keeps the saved one; an empty one removes it. */
+/**
+ * Like the input, but a left-out `apiKey` keeps the saved one (an empty one removes it), and a
+ * left-out `provider` keeps the model's.
+ */
 export const modelUpdateSchema = modelInputSchema.extend({
   apiKey: apiKey.optional(),
+  provider: z.enum(MODEL_PROVIDERS).optional(),
 });
 
 export type ModelInput = z.input<typeof modelInputSchema>;

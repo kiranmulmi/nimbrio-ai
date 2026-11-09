@@ -24,13 +24,8 @@ import {
 import { imageDataUrl, type AttachmentStore } from './attachments.js';
 import type { SkillStore } from './skills.js';
 import { loadAgentConfig, type AgentConfig } from './config.js';
-import {
-  StoppedError,
-  createModelCaller,
-  type CallModel,
-  type ModelRequest,
-  type ModelSettings,
-} from './llm.js';
+import { StoppedError } from './errors.js';
+import { createModelCaller, type CallModel, type ModelRequest, type ModelSettings } from './llm.js';
 import {
   systemPromptSections,
   buildPlannerPrompt,

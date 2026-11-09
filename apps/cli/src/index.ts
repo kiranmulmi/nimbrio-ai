@@ -41,7 +41,10 @@ const isEffort = (value: string): value is ReasoningEffort =>
   (REASONING_EFFORTS as readonly string[]).includes(value);
 
 function describeModel(model: ModelProfile, effort: ReasoningEffort | null): string {
-  const server = (model.baseUrl ?? 'api.openai.com').replace(/^https?:\/\//, '');
+  const server =
+    model.provider === 'cursor'
+      ? 'Cursor'
+      : (model.baseUrl ?? 'api.openai.com').replace(/^https?:\/\//, '');
   const thinking = model.supportsReasoning && effort ? `, ${effort} effort` : '';
   return `${model.name} (${model.model} at ${server}${thinking})`;
 }
