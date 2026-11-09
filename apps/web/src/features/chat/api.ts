@@ -9,7 +9,7 @@ import type {
   RunRequest,
   SteerAccepted,
 } from '@app/shared';
-import { apiUrl, jsonBody, request, requestStream } from '../../lib/api';
+import { jsonBody, request, requestBlob, requestStream } from '../../lib/api';
 
 const chatPath = (chatId: string) => `/chats/${encodeURIComponent(chatId)}`;
 
@@ -71,9 +71,9 @@ export async function uploadAttachment(workspaceId: string, file: File): Promise
   );
 }
 
-/** Where the browser can show or download an attachment. */
-export function attachmentUrl(workspaceId: string, attachmentId: string): string {
-  return apiUrl(
+/** An attached file's contents, to show or save in the browser. */
+export function fetchAttachment(workspaceId: string, attachmentId: string): Promise<Blob> {
+  return requestBlob(
     `/workspaces/${encodeURIComponent(workspaceId)}/attachments/${encodeURIComponent(attachmentId)}/content`,
   );
 }

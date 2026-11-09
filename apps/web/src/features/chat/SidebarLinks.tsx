@@ -49,7 +49,8 @@ function SidebarLink({
 /**
  * The bottom of the chats sidebar: the open workspace's settings, New workspace, and Install app while Chrome
  * offers it. A warning takes the top when the server can't be reached. The app-wide settings
- * (models, MCP servers, agent) open from Preferences in the footer.
+ * (models, MCP servers, agent) open from Preferences in the footer; who is signed in, and Sign
+ * out, are in `AccountMenu` below the workspace switcher.
  */
 export function SidebarLinks({
   info,

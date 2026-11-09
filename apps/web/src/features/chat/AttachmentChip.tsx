@@ -13,15 +13,15 @@ const KIND_LABELS: Record<AttachmentKind, string> = {
 
 /**
  * One attached file: a thumbnail for images, a tinted file icon otherwise, then its name and
- * size. In the composer it shows the upload and can be removed; in a sent message it links
- * to the file.
+ * size. In the composer it shows the upload and can be removed; in a sent message it opens
+ * (downloads) the file.
  */
 export function AttachmentChip({
   name,
   size,
   kind,
   previewUrl,
-  href,
+  onOpen,
   status = 'ready',
   error,
   onRemove,
@@ -30,7 +30,7 @@ export function AttachmentChip({
   size: number;
   kind: AttachmentKind;
   previewUrl?: string | null;
-  href?: string;
+  onOpen?: () => void;
   status?: 'uploading' | 'ready' | 'error';
   error?: string | null;
   onRemove?: () => void;
@@ -72,16 +72,15 @@ export function AttachmentChip({
     isError ? 'border-danger-line' : 'border-line'
   }`;
 
-  return href ? (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      title={`Open ${name}`}
-      className={`${frame} transition-colors hover:border-line-strong hover:bg-surface-2`}
+  return onOpen ? (
+    <button
+      type="button"
+      onClick={onOpen}
+      title={`Download ${name}`}
+      className={`${frame} text-left transition-colors hover:border-line-strong hover:bg-surface-2`}
     >
       {body}
-    </a>
+    </button>
   ) : (
     <div className={frame}>
       {body}

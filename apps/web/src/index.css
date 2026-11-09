@@ -347,6 +347,13 @@
       0 1px 2px rgb(11 51 103 / 0.25);
   }
 
+  /* The login screen's side panel: the brand tile's gradient, large. */
+  .brand-panel {
+    background:
+      radial-gradient(circle at 85% 10%, rgb(255 255 255 / 0.14), transparent 45%),
+      linear-gradient(155deg, var(--brand-from) -25%, var(--brand-mid) 30%, var(--brand-to) 100%);
+  }
+
   /* "Working" indicator: a dot with a ring that ripples outward, so the dot never changes size. */
   .live-dot {
     position: relative;

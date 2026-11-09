@@ -1,5 +1,6 @@
 import type { AgentConfig, AgentLogger, BackgroundTasks, McpHub } from '@app/agent';
 import type { Store } from '@app/db';
+import type { AuthService } from './features/auth/auth.service.js';
 import type { RunRegistry } from './features/runs/run-registry.js';
 import type { AppSettings } from './features/settings/app-settings.js';
 
@@ -16,4 +17,6 @@ export interface AppContext {
   mcp: McpHub;
   /** commands the agent left running on purpose (run_command background), per workspace */
   tasks: BackgroundTasks;
+  /** who may use the API: Supabase sign-in, or nobody asked when it's off */
+  auth: AuthService;
 }

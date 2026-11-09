@@ -428,6 +428,16 @@ export function InstallIcon({ size = 14, ...rest }: IconProps) {
   );
 }
 
+/** A door with an arrow leaving it: sign out. */
+export function SignOutIcon({ size = 14, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M9.5 2.5h-5a1.5 1.5 0 0 0-1.5 1.5v8a1.5 1.5 0 0 0 1.5 1.5h5" />
+      <path d="M7 8h7M11.5 5.5 14 8l-2.5 2.5" />
+    </svg>
+  );
+}
+
 /** An open book with a bookmark: a skill (instructions for a kind of task). */
 export function SkillIcon({ size = 14, ...rest }: IconProps) {
   return (
@@ -624,6 +634,60 @@ export function WrenchIcon({ size = 14, ...rest }: IconProps) {
   return (
     <svg {...base(size)} {...rest}>
       <path d="M10.2 2.2a3.5 3.5 0 0 0-4 4.6L2.3 10.7a1.4 1.4 0 0 0 2 2l3.9-3.9a3.5 3.5 0 0 0 4.6-4l-2 2-1.8-.3-.3-1.8 2-2z" />
+    </svg>
+  );
+}
+
+/** An envelope: an email was sent. */
+export function MailIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <rect x="1.75" y="3.25" width="12.5" height="9.5" rx="1.75" />
+      <path d="M2.25 4.25 8 8.75l5.75-4.5" />
+    </svg>
+  );
+}
+
+/** An open eye: show the password. */
+export function EyeIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M1.5 8S3.9 3.5 8 3.5 14.5 8 14.5 8 12.1 12.5 8 12.5 1.5 8 1.5 8z" />
+      <circle cx="8" cy="8" r="2" />
+    </svg>
+  );
+}
+
+/** A crossed-out eye: hide the password. */
+export function EyeOffIcon({ size = 16, ...rest }: IconProps) {
+  return (
+    <svg {...base(size)} {...rest}>
+      <path d="M6.6 3.65A6.9 6.9 0 0 1 8 3.5c4.1 0 6.5 4.5 6.5 4.5a11.6 11.6 0 0 1-1.7 2.25M4.3 4.9C2.5 6.1 1.5 8 1.5 8s2.4 4.5 6.5 4.5a6.5 6.5 0 0 0 3.2-.85" />
+      <path d="M6.6 6.6a2 2 0 0 0 2.8 2.8M2 2l12 12" />
+    </svg>
+  );
+}
+
+/** Google's "G", in its own colours, as its sign-in buttons must show it. */
+export function GoogleIcon({ size = 18, ...rest }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden {...rest}>
+      <path
+        fill="#FFC107"
+        d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"
+      />
+      <path
+        fill="#FF3D00"
+        d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A11.9 11.9 0 0 1 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"
+      />
     </svg>
   );
 }

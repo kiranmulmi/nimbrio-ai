@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import type { AppInfo, Workspace } from '@app/shared';
 import { Badge } from '../components/Badge';
 import { errorMessage } from '../lib/api';
-import { ChevronDownIcon, ChevronRightIcon, GearIcon, SparkIcon } from '../lib/icons';
+import { useAuth } from '../features/auth/authContext';
+import { ChevronDownIcon, ChevronRightIcon, GearIcon, SignOutIcon, SparkIcon } from '../lib/icons';
 import { usePopover } from '../lib/usePopover';
 
 const APPROVAL_TEXT = {
@@ -66,6 +67,7 @@ export function ConnectionMenu({
 }) {
   const { isOpen, setIsOpen, ref } = usePopover<HTMLDivElement>();
   const { pathname } = useLocation();
+  const auth = useAuth();
   const isOffline = Boolean(error) && !info;
 
   const label = isOffline ? 'Offline' : !info ? 'Connecting…' : 'Connected';
@@ -160,6 +162,24 @@ export function ConnectionMenu({
               onClick={() => setIsOpen(false)}
             />
           </div>
+          {auth && (
+            <div className="border-t border-line py-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  void auth.signOut();
+                }}
+                className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] font-medium text-ink-2 transition-colors hover:bg-subtle hover:text-ink"
+              >
+                <SignOutIcon size={13} className="text-ink-3" />
+                Sign out
+                <span className="ml-auto min-w-0 truncate text-[12px] font-normal text-ink-3">
+                  {auth.user.email}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

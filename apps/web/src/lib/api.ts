@@ -15,9 +15,18 @@ export class ApiError extends Error {
   }
 }
 
-/** The full URL of an API path, e.g. for an `<img src>`. */
-export function apiUrl(path: string): string {
-  return `${BASE_URL}/v1${path}`;
+/** How requests prove who is signed in (`features/auth/AuthGate`); null when sign-in is off. */
+export interface AuthHandlers {
+  /** the current access token, renewed when it's about to run out */
+  accessToken: () => Promise<string | null>;
+  /** the API no longer accepts the token: show the login page */
+  onSignedOut: () => void;
+}
+
+let authHandlers: AuthHandlers | null = null;
+
+export function setAuthHandlers(handlers: AuthHandlers | null): void {
+  authHandlers = handlers;
 }
 
 async function send(path: string, init: RequestInit = {}): Promise<Response> {
@@ -25,8 +34,13 @@ async function send(path: string, init: RequestInit = {}): Promise<Response> {
   if (init.body !== undefined && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
+  const auth = authHandlers;
   try {
-    return await fetch(apiUrl(path), { ...init, headers });
+    const token = await auth?.accessToken();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    const res = await fetch(`${BASE_URL}/v1${path}`, { ...init, headers });
+    if (res.status === 401) auth?.onSignedOut();
+    return res;
   } catch (cause) {
     // An aborted request is the caller's own doing; let it through untouched.
     if (cause instanceof DOMException && cause.name === 'AbortError') throw cause;
@@ -52,6 +66,16 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const json = (await res.json()) as Envelope<T>;
   if (isErrorEnvelope(json)) throw new ApiError(json.error.message, res.status, json.error.code);
   return json.data;
+}
+
+/**
+ * A file the API sends (an attached image, say), fetched with the sign-in, since an
+ * `<img src>` or a link can't carry it.
+ */
+export async function requestBlob(path: string): Promise<Blob> {
+  const res = await send(path);
+  if (!res.ok) throw await toApiError(res);
+  return res.blob();
 }
 
 /** A JSON request body for `request`. */

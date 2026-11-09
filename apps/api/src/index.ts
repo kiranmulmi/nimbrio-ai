@@ -3,12 +3,14 @@ import path from 'node:path';
 import { BackgroundTasks, createLogger, McpHub } from '@app/agent';
 import { Store } from '@app/db';
 import { createApp, WEB_DIST_DIR } from './app.js';
-import { agentConfig, env, HOST } from './config/env.js';
+import { agentConfig, env, HOST, readAuthSettings } from './config/env.js';
+import { createAuthService } from './features/auth/auth.service.js';
 import { RunRegistry } from './features/runs/run-registry.js';
 import { AppSettings } from './features/settings/app-settings.js';
 import { logger } from './logger.js';
 
 async function start(): Promise<void> {
+  const auth = createAuthService(readAuthSettings(env));
   const store = new Store();
   // The data folders were renamed with the app; first move the old ones (and their logs).
   for (const note of await store.moveLegacyFolders()) logger.info(note);
@@ -33,12 +35,17 @@ async function start(): Promise<void> {
     runs: new RunRegistry(),
     mcp,
     tasks,
+    auth,
   });
   const hasModels = (await store.models.list()).length > 0;
   const server = app.listen(env.PORT, HOST, () => {
     const hasWebApp = fs.existsSync(path.join(WEB_DIST_DIR, 'index.html'));
     logger.info(
-      { url: `http://localhost:${env.PORT}`, servesWebApp: hasWebApp },
+      {
+        url: `http://localhost:${env.PORT}`,
+        servesWebApp: hasWebApp,
+        signIn: auth.config.isEnabled,
+      },
       hasWebApp
         ? 'agent app running'
         : 'agent API running (start the web app with npm run dev:web)',

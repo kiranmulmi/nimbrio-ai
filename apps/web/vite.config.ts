@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
           markdown: ['react-markdown', 'remark-gfm'],
+          supabase: ['@supabase/supabase-js'],
         },
       },
     },

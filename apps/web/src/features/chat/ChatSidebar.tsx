@@ -12,6 +12,7 @@ import {
 } from '../../lib/icons';
 import { WorkspaceSwitcher } from '../workspaces/WorkspaceSwitcher';
 import { ChatList } from './ChatList';
+import { AccountMenu } from '../auth/AccountMenu';
 import { SidebarLinks } from './SidebarLinks';
 import { SidebarResizer } from './SidebarResizer';
 import type { useSidebarWidth } from './useSidebarWidth';
@@ -222,6 +223,8 @@ export function ChatSidebar({
             onOpen={onOpenWorkspaces}
           />
         </div>
+
+        <AccountMenu />
       </nav>
     </>
   );

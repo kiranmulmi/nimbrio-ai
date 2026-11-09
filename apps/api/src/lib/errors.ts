@@ -20,6 +20,12 @@ export class ValidationError extends HttpError {
   }
 }
 
+export class UnauthorizedError extends HttpError {
+  constructor(message = 'Sign in first.') {
+    super(401, 'UNAUTHORIZED', message);
+  }
+}
+
 export class ForbiddenError extends HttpError {
   constructor(message = 'Forbidden') {
     super(403, 'FORBIDDEN', message);

@@ -268,7 +268,7 @@ export function refuseCommand(command: string): string | null {
 
 /** This app's own settings and npm's per-script variables: never handed to a command. */
 const APP_ENV =
-  /^(OPENAI_|AGENT_|EVAL_|SEARXNG_|VITE_|npm_)|^(DATABASE_URL|TEST_DATABASE_URL|PORT|HOST|CORS_ORIGIN|LOG_LEVEL|INIT_CWD|NODE_ENV)$/;
+  /^(OPENAI_|AGENT_|EVAL_|SEARXNG_|VITE_|npm_)|^(DATABASE_URL|TEST_DATABASE_URL|PORT|HOST|CORS_ORIGIN|LOG_LEVEL|INIT_CWD|NODE_ENV|SUPABASE_URL|SUPABASE_ANON_KEY|AUTH_ALLOWED_EMAILS)$/;
 
 /**
  * The environment for a command: the user's (PATH, HOME, ...) minus this app's

@@ -523,10 +523,21 @@ test(
       EVAL_API_KEY: 'sk-eval',
       npm_config_cache: 'y',
       PORT: '3000',
+      SUPABASE_URL: 'https://x.supabase.co',
+      SUPABASE_ANON_KEY: 'anon',
+      AUTH_ALLOWED_EMAILS: 'me@example.com',
     });
     assert.equal(env.PATH, '/bin');
     assert.equal(env.HOME, '/h');
-    for (const key of ['DATABASE_URL', 'EVAL_API_KEY', 'npm_config_cache', 'PORT'])
+    for (const key of [
+      'DATABASE_URL',
+      'EVAL_API_KEY',
+      'npm_config_cache',
+      'PORT',
+      'SUPABASE_URL',
+      'SUPABASE_ANON_KEY',
+      'AUTH_ALLOWED_EMAILS',
+    ])
       assert.equal(env[key], undefined, key);
   },
 );

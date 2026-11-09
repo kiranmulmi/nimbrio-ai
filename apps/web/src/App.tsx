@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { AuthGate } from './features/auth/AuthGate';
 import { ChatRoute } from './features/chat/ChatRoute';
 import { McpServerFormPage } from './features/mcp/McpServerFormPage';
 import { McpServersPage } from './features/mcp/McpServersPage';
@@ -79,7 +80,9 @@ export function App() {
     <BrowserRouter>
       <ThemeProvider>
         <ToastProvider>
-          <AppRoutes />
+          <AuthGate>
+            <AppRoutes />
+          </AuthGate>
         </ToastProvider>
       </ThemeProvider>
     </BrowserRouter>

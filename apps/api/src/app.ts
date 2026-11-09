@@ -8,6 +8,7 @@ import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import type { AppContext } from './context.js';
 import { attachmentsRouter } from './features/attachments/attachments.routes.js';
+import { authConfigRouter, authRouter, requireUser } from './features/auth/auth.routes.js';
 import {
   UPLOAD_BODY_LIMIT,
   createAttachmentsService,
@@ -69,8 +70,19 @@ export function createApp(context: AppContext) {
     helmet({
       contentSecurityPolicy: {
         directives: {
-          // blob: lets the composer preview a pasted or picked image before it is sent.
-          'img-src': ["'self'", 'data:', 'blob:'],
+          // blob: lets the composer preview a pasted or picked image before it is sent. With
+          // sign-in on, the sidebar shows the user's Google profile photo.
+          'img-src': [
+            "'self'",
+            'data:',
+            'blob:',
+            ...(context.auth.config.isEnabled ? ['https://*.googleusercontent.com'] : []),
+          ],
+          // The web app signs in with Supabase straight from the browser.
+          'connect-src': [
+            "'self'",
+            ...(context.auth.config.isEnabled ? [context.auth.config.supabaseUrl] : []),
+          ],
         },
       },
     }),
@@ -87,6 +99,10 @@ export function createApp(context: AppContext) {
   });
 
   const v1 = express.Router();
+  v1.use(authConfigRouter(context.auth));
+  // Everything below needs a signed-in user when sign-in is on.
+  v1.use(requireUser(context.auth));
+  v1.use(authRouter());
   v1.use(infoRouter(context));
   v1.use(settingsRouter(context.settings));
   v1.use(modelsRouter(models));

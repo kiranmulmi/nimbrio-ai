@@ -214,3 +214,5 @@ export {
   type BackgroundTaskDetail,
   type TaskStart,
 } from './task.js';
+
+export { type AuthConfig, type AuthUser } from './auth.js';

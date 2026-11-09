@@ -1,7 +1,10 @@
 import type { Attachment } from '@app/shared';
 import { CopyButton } from '../../components/CopyButton';
-import { attachmentUrl } from './api';
+import { errorMessage } from '../../lib/api';
+import { useToast } from '../../lib/toast';
+import { fetchAttachment } from './api';
 import { AttachmentChip } from './AttachmentChip';
+import { AttachmentImage } from './AttachmentImage';
 import { MessageTime } from './MessageTime';
 import { SkillChip } from './SkillChip';
 
@@ -28,32 +31,30 @@ export function UserMessage({
   isSteer?: boolean;
   workspaceId: string;
 }) {
+  const toast = useToast();
   const images = attachments.filter((a) => a.kind === 'image');
   const others = attachments.filter((a) => a.kind !== 'image');
+
+  /** Saves the file: it comes with the sign-in, so a plain link can't fetch it. */
+  async function download(file: Attachment) {
+    try {
+      const url = URL.createObjectURL(await fetchAttachment(workspaceId, file.id));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (cause) {
+      toast(errorMessage(cause, `Couldn't open ${file.name}.`), 'error');
+    }
+  }
   return (
     <div className="group/message flex flex-col items-end gap-1.5">
       {images.length > 0 && (
         <div className="flex max-w-[92%] flex-wrap justify-end gap-1.5 md:max-w-[80%]">
-          {images.map((image) => {
-            const url = attachmentUrl(workspaceId, image.id);
-            return (
-              <a
-                key={image.id}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={image.name}
-                className="block overflow-hidden rounded-2xl border border-line bg-subtle shadow-card transition-opacity hover:opacity-90"
-              >
-                <img
-                  src={url}
-                  alt={image.name}
-                  loading="lazy"
-                  className="h-28 w-auto max-w-[240px] object-cover sm:h-36"
-                />
-              </a>
-            );
-          })}
+          {images.map((image) => (
+            <AttachmentImage key={image.id} workspaceId={workspaceId} image={image} />
+          ))}
         </div>
       )}
       {skills.length > 0 && (
@@ -71,7 +72,7 @@ export function UserMessage({
               name={file.name}
               size={file.size}
               kind={file.kind}
-              href={attachmentUrl(workspaceId, file.id)}
+              onOpen={() => void download(file)}
             />
           ))}
         </div>
