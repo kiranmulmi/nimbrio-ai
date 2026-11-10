@@ -55,7 +55,6 @@ export function ModelsPage() {
     setPendingDefault(model.id);
     try {
       await makeDefaultModel(model.id);
-      models.reload();
       toast(`${model.name} is now the default`);
     } catch (cause) {
       toast(errorMessage(cause, "Couldn't change the default model."), 'error');
@@ -72,7 +71,6 @@ export function ModelsPage() {
     setIsDeleting(true);
     try {
       await deleteModel(toDelete.id);
-      models.reload();
       toast('Model deleted');
       setToDelete(null);
     } catch (cause) {
